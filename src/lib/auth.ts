@@ -1,13 +1,20 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
-// 根据环境确定基础URL
-const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://a.hin.cool';
-  } else {
-    return 'http://localhost:3000';
+// 动态获取重定向URI，优先使用环境变量
+const getRedirectUri = () => {
+  // 优先使用显式配置的重定向URI
+  if (process.env.AZURE_REDIRECT_URI) {
+    return process.env.AZURE_REDIRECT_URI;
   }
+  
+  // 次选NEXTAUTH_URL环境变量（NextAuth标准）
+  if (process.env.NEXTAUTH_URL) {
+    return `${process.env.NEXTAUTH_URL}/api/auth/callback`;
+  }
+  
+  // 开发环境默认值
+  return 'http://localhost:3000/api/auth/callback';
 };
 
 // Azure OAuth配置
@@ -15,7 +22,7 @@ const azureConfig = {
   clientId: process.env.AZURE_CLIENT_ID || '',
   clientSecret: process.env.AZURE_CLIENT_SECRET || '',
   tenantId: process.env.AZURE_TENANT_ID || '',
-  redirectUri: process.env.AZURE_REDIRECT_URI || `${getBaseUrl()}/api/auth/callback`,
+  redirectUri: getRedirectUri(), // 使用动态获取的重定向URI
   scope: 'https://graph.microsoft.com/Files.ReadWrite.AppFolder offline_access https://graph.microsoft.com/User.Read',
   jwtSecret: process.env.JWT_SECRET || 'fallback_secret_change_in_production'
 };
@@ -58,7 +65,7 @@ export async function getAccessToken(code: string): Promise<{
     client_id: azureConfig.clientId,
     scope: azureConfig.scope,
     code: code,
-    redirect_uri: azureConfig.redirectUri,
+    redirect_uri: azureConfig.redirectUri, // 使用动态获取的重定向URI
     grant_type: 'authorization_code',
     client_secret: azureConfig.clientSecret
   });
