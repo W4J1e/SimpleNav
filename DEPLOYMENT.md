@@ -28,11 +28,13 @@
      - `AZURE_CLIENT_ID`: 你的 Azure 客户端 ID
      - `AZURE_CLIENT_SECRET`: 你的 Azure 客户端密钥
      - `AZURE_TENANT_ID`: 你的 Azure 租户 ID
+     - `AZURE_REDIRECT_URI`: `https://yourdomain.com/api/auth/callback`
      - `JWT_SECRET`: 用于 JWT 签名的密钥
 
 2. 在 Azure 应用注册中配置重定向 URI：
-   - 添加生产环境的重定向 URI: `https://example.com/api/auth/callback`
+   - 添加生产环境的重定向 URI: `https://yourdomain.com/api/auth/callback` (替换为您的实际域名)
    - 保留开发环境的重定向 URI: `http://localhost:3000/api/auth/callback`
+   - 确保重定向 URI 与环境变量 `AZURE_REDIRECT_URI` 中的值完全匹配
 
 ## Azure 应用注册配置
 
@@ -60,9 +62,11 @@
 ## 注意事项
 
 1. **环境变量自动处理**：
-   - 代码会根据 `NODE_ENV` 自动选择正确的重定向 URI
-   - 开发环境: `http://localhost:3000/api/auth/callback`
-   - 生产环境: `https://example.com/api/auth/callback`
+   - 代码会根据环境变量自动选择正确的重定向 URI
+   - 开发环境: `http://localhost:3000/api/auth/callback` (默认值)
+   - 生产环境: 必须显式设置 `AZURE_REDIRECT_URI` 环境变量
+   - 优先级: `AZURE_REDIRECT_URI` > `NEXTAUTH_URL` > 默认值
+   - **重要**: 生产环境必须设置 `AZURE_REDIRECT_URI=https://yourdomain.com/api/auth/callback`
 
 2. **安全性**：
    - 不要将 `.env.local` 文件提交到版本控制

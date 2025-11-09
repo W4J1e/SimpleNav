@@ -7,17 +7,19 @@ export const runtime = 'nodejs';
 
 // 获取基础URL函数（与lib/auth.ts中保持一致）
 function getBaseUrl(): string {
+  // 优先使用环境变量中的AZURE_REDIRECT_URI，并从中提取基础URL
   if (process.env.AZURE_REDIRECT_URI) {
-    // 从AZURE_REDIRECT_URI中提取基础URL
     const redirectUri = process.env.AZURE_REDIRECT_URI;
     const baseUrl = redirectUri.replace('/api/auth/callback', '');
     return baseUrl;
   }
   
+  // 次选NEXTAUTH_URL环境变量
   if (process.env.NEXTAUTH_URL) {
     return process.env.NEXTAUTH_URL;
   }
   
+  // 开发环境默认值
   return 'http://localhost:3000';
 }
 
