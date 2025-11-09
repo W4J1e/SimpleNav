@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         authInfo = { error: `认证状态检查失败: ${authResponse.status}` };
       }
     } catch (error) {
-      authInfo = { error: `认证状态检查异常: ${error.message}` };
+      authInfo = { error: `认证状态检查异常: ${error instanceof Error ? error.message : String(error)}` };
     }
 
     return NextResponse.json({
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('调试信息获取失败:', error);
     return NextResponse.json(
-      { error: '调试信息获取失败', message: error.message },
+      { error: '调试信息获取失败', message: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
