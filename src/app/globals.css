@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-image: none;
+  --bg-color: #1a1a2e;
+  --bg-size: cover;
+  --bg-position: center;
+  --bg-repeat: no-repeat;
+}
+
+/* 确保body背景样式正确应用 */
+body {
+  background-image: var(--bg-image);
+  background-color: var(--bg-color);
+  background-size: var(--bg-size, cover);
+  background-position: var(--bg-position, center);
+  background-repeat: var(--bg-repeat, no-repeat);
+  background-attachment: fixed;
+  min-height: 100vh;
+  transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out;
+}
+
+@layer utilities {
+    .content-auto {
+        content-visibility: auto;
+    }
+    .bg-blur {
+        backdrop-filter: blur(8px);
+    }
+    .transition-transform-opacity {
+        transition-property: transform, opacity;
+    }
+    .scale-hover {
+        @apply hover:scale-105 transition-all duration-300;
+    }
+    .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .link-card {
+        @apply relative cursor-pointer;
+    }
+    .link-card .edit-link {
+        @apply opacity-0 group-hover:opacity-100 transition-opacity;
+    }
+    .masonry-grid {
+        column-count: 2;
+        column-gap: 1rem;
+    }
+    @screen sm {
+        .masonry-grid {
+            column-count: 3;
+        }
+    }
+    @screen md {
+        .masonry-grid {
+            column-count: 4;
+        }
+    }
+    @screen lg {
+        .masonry-grid {
+            column-count: 5;
+        }
+    }
+    .masonry-item {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+    }
+}
