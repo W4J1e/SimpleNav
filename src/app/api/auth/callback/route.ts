@@ -5,8 +5,8 @@ import { OneDriveService } from '@/lib/onedrive';
 export const dynamic = 'force-dynamic'; 
 export const runtime = 'nodejs'; 
 
-// 获取基础URL函数（与lib/auth.ts中保持一致）
-function getBaseUrl(): string {
+// 获取基础URL函数，考虑EdgeOne Pages的代理情况
+function getBaseUrl(request?: NextRequest): string {
   // 优先使用环境变量中的AZURE_REDIRECT_URI，并从中提取基础URL
   if (process.env.AZURE_REDIRECT_URI) {
     const redirectUri = process.env.AZURE_REDIRECT_URI;
@@ -17,6 +17,16 @@ function getBaseUrl(): string {
   // 次选NEXTAUTH_URL环境变量
   if (process.env.NEXTAUTH_URL) {
     return process.env.NEXTAUTH_URL;
+  }
+  
+  // 如果有请求对象，从请求头中获取实际的主机名（用于EdgeOne Pages等代理环境）
+  if (request) {
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const proto = request.headers.get('x-forwarded-proto') || 'https';
+    
+    if (host && !host.includes('localhost')) {
+      return `${proto}://${host}`;
+    }
   }
   
   // 开发环境默认值
@@ -32,13 +42,13 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('OAuth错误:', error);
       return NextResponse.redirect(
-        new URL('/?error=auth_failed', getBaseUrl())
+        new URL('/?error=auth_failed', getBaseUrl(request))
       );
     }
     
     if (!code) {
       return NextResponse.redirect(
-        new URL('/?error=no_code', getBaseUrl())
+        new URL('/?error=no_code', getBaseUrl(request))
       );
     }
     
@@ -67,8 +77,8 @@ export async function GET(request: NextRequest) {
       refreshToken
     });
     
-    // 修复：使用环境变量中的基础URL而不是request.url
-    const baseUrl = getBaseUrl();
+    // 使用实际的基础URL，考虑EdgeOne Pages的代理情况
+    const baseUrl = getBaseUrl(request);
     const response = NextResponse.redirect(
       new URL('/?auth=success', baseUrl)
     );
@@ -129,7 +139,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('OAuth回调错误:', error);
     return NextResponse.redirect(
-      new URL('/?error=auth_callback_failed', getBaseUrl())
+      new URL('/?error=auth_callback_failed', getBaseUrl(request))
     );
   }
 }
