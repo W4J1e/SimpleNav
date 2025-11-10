@@ -14,9 +14,6 @@ export default function OneDriveAuth({ onAuthChange }: OneDriveAuthProps) {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
-    // 检查认证状态
-    checkAuthStatus();
-    
     // 检查URL参数，处理OAuth回调
     const urlParams = new URLSearchParams(window.location.search);
     const authStatus = urlParams.get('auth');
@@ -25,6 +22,7 @@ export default function OneDriveAuth({ onAuthChange }: OneDriveAuthProps) {
     if (authStatus === 'success') {
       // 清除URL参数
       window.history.replaceState({}, document.title, window.location.pathname);
+      // 重新检查认证状态
       checkAuthStatus();
       setShowSuccessMessage(true);
       // 3秒后隐藏成功消息
@@ -35,6 +33,9 @@ export default function OneDriveAuth({ onAuthChange }: OneDriveAuthProps) {
       window.history.replaceState({}, document.title, window.location.pathname);
       // 5秒后自动清除错误消息
       setTimeout(() => setError(null), 5000);
+    } else {
+      // 检查认证状态
+      checkAuthStatus();
     }
   }, []);
 

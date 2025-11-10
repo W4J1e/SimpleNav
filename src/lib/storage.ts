@@ -72,12 +72,6 @@ export function setUseOneDriveStorage(use: boolean): void {
 
 // 获取设置
 export function getSettings(): Settings {
-  // 如果使用OneDrive存储，从OneDrive获取
-  if (useOneDriveStorage() && oneDriveStorage.isLoggedIn()) {
-    // 这里应该从OneDrive获取，但为了同步问题，我们仍然从本地获取
-    // 实际的OneDrive同步在组件中处理
-  }
-  
   // 从本地存储获取
   if (typeof window === 'undefined') return defaultSettings;
   
@@ -116,12 +110,6 @@ export function saveSettings(settings: Settings): void {
 
 // 获取链接
 export function getLinks(): Link[] {
-  // 如果使用OneDrive存储，从OneDrive获取
-  if (useOneDriveStorage() && oneDriveStorage.isLoggedIn()) {
-    // 这里应该从OneDrive获取，但为了同步问题，我们仍然从本地获取
-    // 实际的OneDrive同步在组件中处理
-  }
-  
   // 从本地存储获取
   if (typeof window === 'undefined') return defaultLinks;
   

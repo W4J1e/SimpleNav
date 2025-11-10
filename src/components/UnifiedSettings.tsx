@@ -25,28 +25,47 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
   const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
-    // 检查当前存储设置
-    setUseOneDrive(useOneDriveStorage());
-    
-    // 检查OneDrive认证状态
-    setIsAuthenticated(oneDriveStorage.isLoggedIn());
-    
-    // 检查URL参数中的认证状态
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('auth') === 'success') {
-      // 重新检查认证状态
-      setIsAuthenticated(oneDriveStorage.isLoggedIn());
+    const checkAuthStatus = async () => {
+      // 检查当前存储设置
+      setUseOneDrive(useOneDriveStorage());
       
-      // 移除URL参数避免重复触发
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
+      // 检查URL参数中的认证状态
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('auth') === 'success') {
+        // 从服务器重新检查认证状态
+        try {
+          const response = await fetch('/api/auth/status', {
+            credentials: 'include'
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data.authenticated) {
+              oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
+              setIsAuthenticated(true);
+              setUseOneDriveStorage(true);
+              console.log('设置面板：认证成功，已设置OneDrive存储');
+            }
+          }
+        } catch (error) {
+          console.error('设置面板：检查认证状态失败:', error);
+        }
+        
+        // 移除URL参数避免重复触发
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      } else {
+        // 检查OneDrive认证状态
+        setIsAuthenticated(oneDriveStorage.isLoggedIn());
+      }
+      
+      // 加载当前设置
+      const currentSettings = getSettings();
+      if (currentSettings) {
+        setSettings(currentSettings);
+      }
+    };
     
-    // 加载当前设置
-    const currentSettings = getSettings();
-    if (currentSettings) {
-      setSettings(currentSettings);
-    }
+    checkAuthStatus();
   }, [isOpen]); // 添加isOpen依赖，确保每次打开时都重新检查状态
 
   const handleToggleStorage = async () => {

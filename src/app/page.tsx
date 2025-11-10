@@ -110,13 +110,16 @@ export default function HomePage() {
       if (urlParams.get('auth') === 'success') {
         // 尝试从cookie获取认证信息并设置到oneDriveStorage
         try {
-          const response = await fetch('/api/auth/status');
+          const response = await fetch('/api/auth/status', {
+            credentials: 'include'
+          });
           if (response.ok) {
             const data = await response.json();
             if (data.authenticated) {
               oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
               // 自动启用OneDrive存储
               setUseOneDriveStorage(true);
+              console.log('认证成功，已设置OneDrive存储');
             }
           }
         } catch (error) {
@@ -139,6 +142,7 @@ export default function HomePage() {
             // 重新加载本地数据
             loadedLinks = getLinks();
             loadedSettings = getSettings();
+            console.log('从OneDrive同步数据成功');
           }
         } catch (error) {
           console.error('从OneDrive同步数据失败:', error);

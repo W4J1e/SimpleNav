@@ -5,7 +5,9 @@ import { Metadata } from 'next'
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
-  fallback: ['system-ui', 'arial']
+  fallback: ['system-ui', 'arial'],
+  preload: false, // 禁用预加载以避免字体下载问题
+  adjustFontFallback: false // 禁用字体回退调整
 })
 
 export const metadata: Metadata = {

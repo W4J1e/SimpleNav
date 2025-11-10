@@ -85,6 +85,8 @@ export async function GET(request: NextRequest) {
     
     setAuthCookie(response, token);
     
+    console.log('认证成功，已设置Cookie，重定向到:', baseUrl + '/?auth=success');
+    
     // 初始化OneDrive文件夹和默认配置
     try {
       const oneDriveService = new OneDriveService(accessToken);
