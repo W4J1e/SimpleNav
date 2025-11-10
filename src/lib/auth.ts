@@ -170,51 +170,59 @@ export function setAuthCookie(res: NextResponse, token: string, request?: NextRe
     path: '/'
   };
   
-  // 在生产环境中，设置Cookie域
+  // 在生产环境中优化Cookie设置，特别是针对EdgeOne Pages环境
   if (process.env.NODE_ENV === 'production') {
-    // 优先从请求头获取实际域名（适用于EdgeOne Pages等代理环境）
+    // 对于EdgeOne Pages环境，我们不应该显式设置domain属性
+    // 这是因为EdgeOne Pages可能会使用不同的域名或子域名进行CDN分发
+    // 让浏览器自动处理domain是最安全的方式
+    
+    // 但是我们需要确保secure和sameSite设置正确
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = 'lax';
+    
+    // 重要：在EdgeOne Pages环境中，不要设置explicit的domain属性
+    // 这是解决刷新后Cookie丢失问题的关键
+    
+    // 对于调试目的，我们可以记录一下请求信息，但不强制设置domain
     if (request) {
       const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+      console.log('设置认证Cookie，主机名:', host);
+    }
+  }
+  
+  // 在开发环境中，保持原有行为
+  else {
+    if (request) {
+      const host = request.headers.get('host');
       if (host && !host.includes('localhost')) {
-        // 移除端口号，只保留域名
         const domain = host.split(':')[0];
         cookieOptions.domain = domain;
       }
     }
-    
-    // 如果请求头中没有域名，使用环境变量
-    if (!cookieOptions.domain) {
-      // 优先使用AZURE_REDIRECT_URI来获取域名
-      if (process.env.AZURE_REDIRECT_URI) {
-        try {
-          const url = new URL(process.env.AZURE_REDIRECT_URI);
-          cookieOptions.domain = url.hostname;
-        } catch (error) {
-          // 忽略错误，继续使用默认设置
-        }
-      }
-      // 次选NEXTAUTH_URL
-      else if (process.env.NEXTAUTH_URL) {
-        try {
-          const url = new URL(process.env.NEXTAUTH_URL);
-          cookieOptions.domain = url.hostname;
-        } catch (error) {
-          // 忽略错误，继续使用默认设置
-        }
-      }
-    }
   }
   
+  // 设置Cookie
   res.cookies.set('auth_token', token, cookieOptions);
+  console.log('认证Cookie已设置，secure:', cookieOptions.secure, 'sameSite:', cookieOptions.sameSite);
 }
 
 // 清除认证Cookie
 export function clearAuthCookie(res: NextResponse): void {
-  res.cookies.set('auth_token', '', {
+  const cookieOptions: any = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 0,
     path: '/'
-  });
+  };
+  
+  // 与setAuthCookie保持一致的设置，不在生产环境中设置domain
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = 'lax';
+    // 不设置domain属性
+  }
+  
+  res.cookies.set('auth_token', '', cookieOptions);
+  console.log('认证Cookie已清除');
 }
