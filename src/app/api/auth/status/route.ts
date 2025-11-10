@@ -4,6 +4,13 @@ import { getUserFromRequest } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     console.log('认证状态API：开始检查用户认证状态');
+    console.log('认证状态API：请求URL:', request.url);
+    console.log('认证状态API：请求头:', {
+      host: request.headers.get('host'),
+      'x-forwarded-host': request.headers.get('x-forwarded-host'),
+      'x-forwarded-proto': request.headers.get('x-forwarded-proto'),
+      cookie: request.headers.get('cookie') ? '存在' : '不存在'
+    });
     
     const user = await getUserFromRequest(request);
     console.log('认证状态API：getUserFromRequest返回:', user ? '有用户' : '无用户');

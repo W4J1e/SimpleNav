@@ -165,7 +165,8 @@ export function setAuthCookie(res: NextResponse, token: string): void {
   console.log('setAuthCookie：开始设置认证Cookie');
   console.log('setAuthCookie：token长度:', token.length);
   console.log('setAuthCookie：NODE_ENV:', process.env.NODE_ENV);
-  console.log('setAuthCookie：secure设置:', process.env.NODE_ENV === 'production');
+  console.log('setAuthCookie：NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+  console.log('setAuthCookie：AZURE_REDIRECT_URI:', process.env.AZURE_REDIRECT_URI);
   
   const cookieOptions: any = {
     httpOnly: true,
@@ -175,16 +176,36 @@ export function setAuthCookie(res: NextResponse, token: string): void {
     path: '/'
   };
   
-  // 在生产环境中，可能需要设置domain
-  if (process.env.NODE_ENV === 'production' && process.env.NEXTAUTH_URL) {
-    try {
-      const url = new URL(process.env.NEXTAUTH_URL);
-      cookieOptions.domain = url.hostname;
-      console.log('setAuthCookie：设置domain为:', url.hostname);
-    } catch (error) {
-      console.error('setAuthCookie：解析NEXTAUTH_URL失败:', error);
+  // 在生产环境中，设置Cookie域
+  if (process.env.NODE_ENV === 'production') {
+    // 优先使用AZURE_REDIRECT_URI来获取域名
+    if (process.env.AZURE_REDIRECT_URI) {
+      try {
+        const url = new URL(process.env.AZURE_REDIRECT_URI);
+        cookieOptions.domain = url.hostname;
+        console.log('setAuthCookie：使用AZURE_REDIRECT_URI设置domain为:', url.hostname);
+      } catch (error) {
+        console.error('setAuthCookie：解析AZURE_REDIRECT_URI失败:', error);
+      }
+    }
+    // 次选NEXTAUTH_URL
+    else if (process.env.NEXTAUTH_URL) {
+      try {
+        const url = new URL(process.env.NEXTAUTH_URL);
+        cookieOptions.domain = url.hostname;
+        console.log('setAuthCookie：使用NEXTAUTH_URL设置domain为:', url.hostname);
+      } catch (error) {
+        console.error('setAuthCookie：解析NEXTAUTH_URL失败:', error);
+      }
+    }
+    
+    // 如果以上都失败，尝试从请求头获取域名
+    if (!cookieOptions.domain) {
+      console.log('setAuthCookie：无法从环境变量获取域名，将使用默认设置');
     }
   }
+  
+  console.log('setAuthCookie：最终Cookie选项:', cookieOptions);
   
   res.cookies.set('auth_token', token, cookieOptions);
   console.log('setAuthCookie：Cookie设置完成');
