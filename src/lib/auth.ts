@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
+import cookie from 'cookie';
 
 // 动态获取重定向URI，优先使用环境变量
 const getRedirectUri = () => {
@@ -161,7 +162,7 @@ export async function getUserFromRequest(req: NextRequest): Promise<any> {
 }
 
 // 获取认证Cookie
-export const getAuthCookie = (req?: Request) => {
+export const getAuthCookie = (req?: NextRequest) => {
   if (req) {
     const token = req.cookies.get('auth_token')?.value;
     return token;
