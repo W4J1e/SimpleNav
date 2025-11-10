@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       new URL('/?auth=success', baseUrl)
     );
     
-    setAuthCookie(response, token);
+    setAuthCookie(response, token, request);
     
     console.log('认证成功，已设置Cookie，重定向到:', baseUrl + '/?auth=success');
     console.log('OAuth回调：响应头设置:', {

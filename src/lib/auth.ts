@@ -179,7 +179,7 @@ export async function getUserFromRequest(req: NextRequest): Promise<any> {
 }
 
 // 设置认证Cookie
-export function setAuthCookie(res: NextResponse, token: string): void {
+export function setAuthCookie(res: NextResponse, token: string, request?: NextRequest): void {
   console.log('setAuthCookie：开始设置认证Cookie');
   console.log('setAuthCookie：token长度:', token.length);
   console.log('setAuthCookie：NODE_ENV:', process.env.NODE_ENV);
@@ -196,30 +196,44 @@ export function setAuthCookie(res: NextResponse, token: string): void {
   
   // 在生产环境中，设置Cookie域
   if (process.env.NODE_ENV === 'production') {
-    // 优先使用AZURE_REDIRECT_URI来获取域名
-    if (process.env.AZURE_REDIRECT_URI) {
-      try {
-        const url = new URL(process.env.AZURE_REDIRECT_URI);
-        cookieOptions.domain = url.hostname;
-        console.log('setAuthCookie：使用AZURE_REDIRECT_URI设置domain为:', url.hostname);
-      } catch (error) {
-        console.error('setAuthCookie：解析AZURE_REDIRECT_URI失败:', error);
-      }
-    }
-    // 次选NEXTAUTH_URL
-    else if (process.env.NEXTAUTH_URL) {
-      try {
-        const url = new URL(process.env.NEXTAUTH_URL);
-        cookieOptions.domain = url.hostname;
-        console.log('setAuthCookie：使用NEXTAUTH_URL设置domain为:', url.hostname);
-      } catch (error) {
-        console.error('setAuthCookie：解析NEXTAUTH_URL失败:', error);
+    // 优先从请求头获取实际域名（适用于EdgeOne Pages等代理环境）
+    if (request) {
+      const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+      if (host && !host.includes('localhost')) {
+        // 移除端口号，只保留域名
+        const domain = host.split(':')[0];
+        cookieOptions.domain = domain;
+        console.log('setAuthCookie：从请求头设置domain为:', domain);
       }
     }
     
-    // 如果以上都失败，尝试从请求头获取域名
+    // 如果请求头中没有域名，使用环境变量
     if (!cookieOptions.domain) {
-      console.log('setAuthCookie：无法从环境变量获取域名，将使用默认设置');
+      // 优先使用AZURE_REDIRECT_URI来获取域名
+      if (process.env.AZURE_REDIRECT_URI) {
+        try {
+          const url = new URL(process.env.AZURE_REDIRECT_URI);
+          cookieOptions.domain = url.hostname;
+          console.log('setAuthCookie：使用AZURE_REDIRECT_URI设置domain为:', url.hostname);
+        } catch (error) {
+          console.error('setAuthCookie：解析AZURE_REDIRECT_URI失败:', error);
+        }
+      }
+      // 次选NEXTAUTH_URL
+      else if (process.env.NEXTAUTH_URL) {
+        try {
+          const url = new URL(process.env.NEXTAUTH_URL);
+          cookieOptions.domain = url.hostname;
+          console.log('setAuthCookie：使用NEXTAUTH_URL设置domain为:', url.hostname);
+        } catch (error) {
+          console.error('setAuthCookie：解析NEXTAUTH_URL失败:', error);
+        }
+      }
+    }
+    
+    // 如果以上都失败，不设置domain（让浏览器自动处理）
+    if (!cookieOptions.domain) {
+      console.log('setAuthCookie：无法获取域名，将不设置domain（让浏览器自动处理）');
     }
   }
   
