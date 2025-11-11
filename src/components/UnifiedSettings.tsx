@@ -23,6 +23,7 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [userInfo, setUserInfo] = useState<{ displayName?: string; email?: string; photo?: string } | null>(null);
 
   // 组件挂载时立即检查认证状态，确保页面刷新后能恢复登录状态
   useEffect(() => {
@@ -42,10 +43,19 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
           if (data.authenticated && data.accessToken && data.refreshToken) {
             oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
             setIsAuthenticated(true);
+            // 保存用户信息
+            if (data.user) {
+              setUserInfo(data.user);
+            }
+          } else {
+            setUserInfo(null);
           }
+        } else {
+          setUserInfo(null);
         }
       } catch (error) {
         // 静默处理错误
+        setUserInfo(null);
       }
     };
     
@@ -85,14 +95,21 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
               oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
               setIsAuthenticated(true);
               setUseOneDriveStorage(true);
+              // 保存用户信息
+              if (data.user) {
+                setUserInfo(data.user);
+              }
             } else {
               setIsAuthenticated(false);
+              setUserInfo(null);
             }
           } else {
             setIsAuthenticated(false);
+            setUserInfo(null);
           }
         } catch (error) {
           setIsAuthenticated(false);
+          setUserInfo(null);
         }
         
         // 移除URL参数避免重复触发
@@ -193,18 +210,19 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
   };
 
   const handleLogout = async () => {
-    try {
-      await oneDriveStorage.logout();
-      setIsAuthenticated(false);
-      setUseOneDrive(false);
-      setUseOneDriveStorage(false);
-      setSyncStatus('已退出OneDrive登录');
-      setTimeout(() => setSyncStatus(null), 3000);
-    } catch (error) {
-      setSyncStatus('退出登录失败');
-      setTimeout(() => setSyncStatus(null), 3000);
-    }
-  };
+      try {
+        await oneDriveStorage.logout();
+        setIsAuthenticated(false);
+        setUseOneDrive(false);
+        setUseOneDriveStorage(false);
+        setUserInfo(null);
+        setSyncStatus('已退出OneDrive登录');
+        setTimeout(() => setSyncStatus(null), 3000);
+      } catch (error) {
+        setSyncStatus('退出登录失败');
+        setTimeout(() => setSyncStatus(null), 3000);
+      }
+    };
 
   // 导出数据
   const handleExportData = () => {
@@ -412,14 +430,35 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-green-600 dark:text-green-400 font-medium">✓ 已登录 OneDrive</span>
-                        <button
-                          onClick={handleLogout}
-                          className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                        >
-                          退出登录
-                        </button>
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          {userInfo?.photo ? (
+                            <img 
+                              src={userInfo.photo} 
+                              alt="用户头像" 
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                              {userInfo?.displayName ? userInfo.displayName.charAt(0).toUpperCase() : 'O'}
+                            </div>
+                          )}
+                          <div>
+                            <div className="text-green-600 dark:text-green-400 font-medium">✓ 已登录 OneDrive</div>
+                            {userInfo?.displayName && (
+                              <h4 className="font-medium text-gray-900 dark:text-white">{userInfo.displayName}</h4>
+                            )}
+                            {userInfo?.email && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{userInfo.email}</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={handleLogout}
+                            className="ml-auto text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                          >
+                            退出登录
+                          </button>
+                        </div>
                       </div>
                       
                       <div className="flex items-center justify-between">
