@@ -53,11 +53,7 @@ export const getGradientBackground = (preset: string): string => {
 // 获取Bing每日一图
 export const getBingImage = async (): Promise<string> => {
   try {
-    console.log('=== 获取Bing图片 ===');
-    
-    // 使用用户提供的API - 直接返回图片的API
     const apiUrl = 'https://api.yuafeng.cn/API/ly/bing/';
-    console.log('调用API:', apiUrl);
     
     // 由于API直接返回图片，我们直接使用API URL作为图片URL
     // 但需要验证API是否可用
@@ -66,10 +62,7 @@ export const getBingImage = async (): Promise<string> => {
       mode: 'no-cors' // 使用no-cors模式避免CORS错误
     });
     
-    // 由于no-cors模式，response.ok总是false，但我们知道API返回200 OK
     // 直接使用API URL作为图片URL
-    console.log('API直接返回图片，使用API URL作为图片URL');
-    console.log('=== 获取Bing图片完成 ===');
     return apiUrl;
     
   } catch (error) {
@@ -82,7 +75,6 @@ export const getBingImage = async (): Promise<string> => {
       if (fallbackResponse.ok) {
         const fallbackData = await fallbackResponse.json();
         if (fallbackData.url) {
-          console.log('使用备选API图片URL:', fallbackData.url);
           return fallbackData.url;
         }
       }
@@ -92,7 +84,6 @@ export const getBingImage = async (): Promise<string> => {
     
     // 如果所有API都失败，使用默认图片
     const defaultUrl = 'https://picsum.photos/1920/1080?random=1';
-    console.log('使用默认图片URL:', defaultUrl);
     return defaultUrl;
   }
 };

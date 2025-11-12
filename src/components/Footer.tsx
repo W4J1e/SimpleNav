@@ -3,12 +3,18 @@
 interface FooterProps {
   onToggleUnifiedSettings: () => void;
   onToggleAbout: () => void;
+  onToggleHelp: () => void;
 }
 
-export default function Footer({ onToggleUnifiedSettings, onToggleAbout }: FooterProps) {
+export default function Footer({ onToggleUnifiedSettings, onToggleAbout, onToggleHelp }: FooterProps) {
   const handleAboutClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onToggleAbout();
+  };
+
+  const handleHelpClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onToggleHelp();
   };
 
   return (
@@ -28,7 +34,12 @@ export default function Footer({ onToggleUnifiedSettings, onToggleAbout }: Foote
           >
             设置
           </button>
-          <a href="#" className="hover:text-white transition-all text-sm">帮助</a>
+          <button 
+            onClick={handleHelpClick}
+            className="hover:text-white transition-all text-sm bg-transparent border-none cursor-pointer"
+          >
+            帮助
+          </button>
         </div>
       </div>
     </footer>

@@ -9,6 +9,7 @@ import LinkForm from '@/components/LinkForm';
 import Footer from '@/components/Footer';
 import UnifiedSettings from '@/components/UnifiedSettings';
 import AboutDialog from '@/components/AboutDialog';
+import HelpDialog from '@/components/HelpDialog';
 import { Link, Settings } from '@/types';
 import { getLinks, saveLinks, getSettings, saveSettings, useOneDriveStorage, setUseOneDriveStorage, syncFromOneDrive, defaultSettings } from '@/lib/storage';
 import { oneDriveStorage } from '@/lib/onedrive-storage';
@@ -26,6 +27,7 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isUnifiedSettingsOpen, setIsUnifiedSettingsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   
   // 页面加载时立即检查认证状态
   useEffect(() => {
@@ -165,8 +167,11 @@ export default function HomePage() {
         
         // 尝试从cookie获取认证信息并设置到oneDriveStorage
         try {
-          const response = await fetch('/api/auth/status', {
-            credentials: 'include'
+          const response = await fetch('/api/auth/status', { 
+            credentials: 'include',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate'
+            }
           });
           console.log('页面初始化：认证状态API响应状态:', response.status);
           
@@ -174,14 +179,17 @@ export default function HomePage() {
             const data = await response.json();
             console.log('页面初始化：认证状态API返回数据:', data);
             
-            if (data.authenticated) {
-              console.log('页面初始化：认证成功，设置令牌和存储状态');
+            if (data.authenticated && data.accessToken && data.refreshToken) {
+              console.log('页面初始化：认证成功，设置令牌和状态');
+              // 设置token到存储实例
               oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
               // 自动启用OneDrive存储
               setUseOneDriveStorage(true);
-              console.log('页面初始化：认证成功，已设置OneDrive存储');
+              // 更新React组件状态
+              setIsAuthenticated(true);
+              console.log('页面初始化：认证成功，已设置OneDrive存储和认证状态');
             } else {
-              console.log('页面初始化：认证状态API返回未认证');
+              console.log('页面初始化：认证状态API返回未认证或缺少令牌');
             }
           } else {
             console.log('页面初始化：认证状态API请求失败:', response.status);
@@ -202,9 +210,8 @@ export default function HomePage() {
       // 优化同步触发条件：
       // 1. 只有在使用OneDrive存储
       // 2. oneDriveStorage.isLoggedIn()返回true（表明有token）
-      // 3. 当前有认证状态时，才尝试从OneDrive同步数据
-      // 这样可以避免认证已失效但本地状态未更新时的无效同步尝试
-      if (useOneDriveStorage() && oneDriveStorage.isLoggedIn() && isAuthenticated) {
+      // 这样可以避免认证状态未同步完成时的错误判断
+      if (useOneDriveStorage() && oneDriveStorage.isLoggedIn()) {
         try {
           console.log('尝试从OneDrive同步数据...');
           const syncSuccess = await syncFromOneDrive();
@@ -218,9 +225,9 @@ export default function HomePage() {
           console.error('从OneDrive同步数据失败:', error);
           // 同步失败时不修改本地数据，保持现有数据
         }
-      } else if (useOneDriveStorage() && !isAuthenticated) {
-        console.log('检测到启用了OneDrive存储但未认证，自动切换到本地存储');
-        // 如果启用了OneDrive存储但未认证，自动切换到本地存储
+      } else if (useOneDriveStorage() && !oneDriveStorage.isLoggedIn()) {
+        console.log('检测到启用了OneDrive存储但未登录，自动切换到本地存储');
+        // 如果启用了OneDrive存储但未登录（没有token），自动切换到本地存储
         setUseOneDriveStorage(false);
       }
       
@@ -388,6 +395,7 @@ export default function HomePage() {
       <Footer 
         onToggleUnifiedSettings={toggleUnifiedSettings}
         onToggleAbout={toggleAbout}
+        onToggleHelp={() => setIsHelpOpen(true)}
       />
       
       <LinkForm 
@@ -409,6 +417,12 @@ export default function HomePage() {
       <AboutDialog 
         isOpen={isAboutOpen}
         onClose={toggleAbout}
+      />
+      
+      {/* 帮助对话框 */}
+      <HelpDialog 
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
       />
     </div>
   );
