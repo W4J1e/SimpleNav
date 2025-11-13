@@ -55,9 +55,49 @@ export class OneDriveStorage {
     return !!this.userToken;
   }
 
+  // 验证令牌有效性并刷新（如果需要）
+  async validateAndRefreshToken(): Promise<boolean> {
+    if (!this.userToken) {
+      return false;
+    }
+
+    try {
+      // 调用认证状态API检查令牌有效性
+      const response = await fetch('/api/auth/status', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.authenticated && data.accessToken && data.refreshToken) {
+        // 令牌有效，更新本地令牌
+        this.setUserToken(data.accessToken, data.refreshToken);
+        return true;
+      } else {
+        // 令牌无效，清除本地令牌
+        this.clearUserToken();
+        return false;
+      }
+    } catch (error) {
+      // 网络错误或其他错误，认为令牌无效
+      this.clearUserToken();
+      return false;
+    }
+  }
+
   // 获取设置
   async getSettings(): Promise<Settings | null> {
     if (!this.userToken) {
+      return null;
+    }
+
+    // 验证令牌有效性
+    const isValid = await this.validateAndRefreshToken();
+    if (!isValid) {
       return null;
     }
 
@@ -85,6 +125,12 @@ export class OneDriveStorage {
   // 保存设置
   async saveSettings(settings: Settings): Promise<boolean> {
     if (!this.userToken) {
+      return false;
+    }
+
+    // 验证令牌有效性
+    const isValid = await this.validateAndRefreshToken();
+    if (!isValid) {
       return false;
     }
 
@@ -116,6 +162,12 @@ export class OneDriveStorage {
       return [];
     }
 
+    // 验证令牌有效性
+    const isValid = await this.validateAndRefreshToken();
+    if (!isValid) {
+      return [];
+    }
+
     try {
       const response = await fetch('/api/onedrive/links', {
         method: 'GET',
@@ -140,6 +192,12 @@ export class OneDriveStorage {
   // 保存链接
   async saveLinks(links: Link[]): Promise<boolean> {
     if (!this.userToken) {
+      return false;
+    }
+
+    // 验证令牌有效性
+    const isValid = await this.validateAndRefreshToken();
+    if (!isValid) {
       return false;
     }
 

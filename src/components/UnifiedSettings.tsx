@@ -28,33 +28,58 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
   // 组件挂载时立即检查认证状态，确保页面刷新后能恢复登录状态
   useEffect(() => {
     const initialCheckAuthStatus = async () => {
-      // 直接从服务器获取认证状态，而不只是检查本地OneDriveStorage
       try {
-        const response = await fetch('/api/auth/status', {
-          credentials: 'include',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate'
-          }
-        });
+        // 首先验证并刷新令牌
+        const isValid = await oneDriveStorage.validateAndRefreshToken();
         
-        if (response.ok) {
-          const data = await response.json();
+        if (isValid) {
+          setIsAuthenticated(true);
+          // 从服务器获取最新的用户信息
+          const response = await fetch('/api/auth/status', {
+            credentials: 'include',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate'
+            }
+          });
           
-          if (data.authenticated && data.accessToken && data.refreshToken) {
-            oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
-            setIsAuthenticated(true);
+          if (response.ok) {
+            const data = await response.json();
             // 保存用户信息
             if (data.user) {
               setUserInfo(data.user);
             }
-          } else {
-            setUserInfo(null);
           }
         } else {
-          setUserInfo(null);
+          // 令牌无效，尝试从服务器获取新的认证状态
+          const response = await fetch('/api/auth/status', {
+            credentials: 'include',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data.authenticated && data.accessToken && data.refreshToken) {
+              oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
+              setIsAuthenticated(true);
+              // 保存用户信息
+              if (data.user) {
+                setUserInfo(data.user);
+              }
+            } else {
+              setIsAuthenticated(false);
+              setUserInfo(null);
+            }
+          } else {
+            setIsAuthenticated(false);
+            setUserInfo(null);
+          }
         }
       } catch (error) {
         // 静默处理错误
+        setIsAuthenticated(false);
         setUserInfo(null);
       }
     };

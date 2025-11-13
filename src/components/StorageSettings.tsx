@@ -15,7 +15,13 @@ export default function StorageSettings() {
     setUseOneDrive(useOneDriveStorage());
     
     // 检查OneDrive认证状态
-    setIsAuthenticated(oneDriveStorage.isLoggedIn());
+    const checkAuthStatus = async () => {
+      // 验证令牌有效性
+      const isValid = await oneDriveStorage.validateAndRefreshToken();
+      setIsAuthenticated(isValid);
+    };
+    
+    checkAuthStatus();
   }, []);
 
   const handleToggleStorage = async () => {

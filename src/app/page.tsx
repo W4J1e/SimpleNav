@@ -243,7 +243,6 @@ export default function HomePage() {
         setSettings(loadedSettings);
       } else {
         // 使用默认设置
-        const { defaultSettings } = await import('@/lib/storage');
         setSettings(defaultSettings);
       }
     };

@@ -154,6 +154,7 @@ export function saveLinks(links: Link[]): void {
 
 // 从OneDrive同步数据到本地
 export async function syncFromOneDrive(): Promise<boolean> {
+  // 先验证登录状态和令牌有效性
   if (!oneDriveStorage.isLoggedIn()) {
     return false;
   }
@@ -174,14 +175,17 @@ export async function syncFromOneDrive(): Promise<boolean> {
     
     return true;
   } catch (error) {
-    // 静默处理错误
+    // 记录错误但不抛出，避免影响用户体验
     console.error('从OneDrive同步数据失败:', error);
+    // 清除无效的登录状态
+    oneDriveStorage.clearUserToken();
     return false;
   }
 }
 
 // 将本地数据同步到OneDrive
 export async function syncToOneDrive(): Promise<boolean> {
+  // 先验证登录状态和令牌有效性
   if (!oneDriveStorage.isLoggedIn()) {
     return false;
   }
@@ -195,9 +199,18 @@ export async function syncToOneDrive(): Promise<boolean> {
     const settingsSuccess = await oneDriveStorage.saveSettings(settings);
     const linksSuccess = await oneDriveStorage.saveLinks(links);
     
-    return settingsSuccess && linksSuccess;
+    // 如果任何一个操作失败，清除无效的登录状态
+    if (!settingsSuccess || !linksSuccess) {
+      oneDriveStorage.clearUserToken();
+      return false;
+    }
+    
+    return true;
   } catch (error) {
-    // 静默处理错误
+    // 记录错误但不抛出，避免影响用户体验
+    console.error('将数据同步到OneDrive失败:', error);
+    // 清除无效的登录状态
+    oneDriveStorage.clearUserToken();
     return false;
   }
 }

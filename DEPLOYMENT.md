@@ -20,18 +20,9 @@
    JWT_SECRET=your_jwt_secret_key
    ```
 
-### 2. 生产环境 (GitHub + EdgeOne Pages)
+### 2. 生产环境 (GitHub + vercel/EdgeOne Pages)
 
-1. 在 GitHub 仓库中设置环境变量：
-   - 进入仓库的 Settings > Secrets and variables > Actions
-   - 添加以下 Repository secrets：
-     - `AZURE_CLIENT_ID`: 你的 Azure 客户端 ID
-     - `AZURE_CLIENT_SECRET`: 你的 Azure 客户端密钥
-     - `AZURE_TENANT_ID`: 你的 Azure 租户 ID
-     - `AZURE_REDIRECT_URI`: `https://yourdomain.com/api/auth/callback`
-     - `JWT_SECRET`: 用于 JWT 签名的密钥
-
-2. 在 Azure 应用注册中配置重定向 URI：
+1. 在 Azure 应用注册中配置重定向 URI：
    - 添加生产环境的重定向 URI: `https://yourdomain.com/api/auth/callback` (替换为您的实际域名)
    - 保留开发环境的重定向 URI: `http://localhost:3000/api/auth/callback`
    - 确保重定向 URI 与环境变量 `AZURE_REDIRECT_URI` 中的值完全匹配
@@ -51,13 +42,13 @@
    - `Microsoft Graph` > `User.Read`
 6. 在 "Certificates & secrets" 部分创建客户端密钥
 
-## EdgeOne Pages 部署
+## vercel/EdgeOne Pages 部署
 
-1. 连接 GitHub 仓库到 EdgeOne Pages
+1. 连接 GitHub 仓库
 2. 配置构建命令：
    - 构建命令: `npm run build`
    - 输出目录: `.next`
-3. 在 EdgeOne Pages 设置中添加环境变量（与 GitHub Secrets 相同）
+3. 在 vercel/EdgeOne Pages 设置中添加环境变量
 
 ## 注意事项
 
