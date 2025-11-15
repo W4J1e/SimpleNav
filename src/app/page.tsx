@@ -350,6 +350,12 @@ export default function HomePage() {
       saveLinks(newLinks);
     }
   };
+  
+  // 重新排序链接
+  const handleLinksReorder = (newLinks: Link[]) => {
+    setLinks(newLinks);
+    saveLinks(newLinks);
+  };
 
   // 切换搜索引擎
   const handleSearchEngineChange = (engine: 'bing' | 'google') => {
@@ -388,6 +394,7 @@ export default function HomePage() {
           onEditLink={handleEditLink}
           onDeleteLink={handleDeleteLink}
           onAddLink={toggleLinkForm}
+          onLinksReorder={handleLinksReorder}
         />
       </main>
       

@@ -27,7 +27,7 @@ export default function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
           <div className="space-y-4">
             <div className="flex">
               <div className="text-gray-800 dark:text-white">
-                <p className="text-sm">1. 长按链接卡片进入编辑模式</p>
+                <p className="text-sm">1. 长按链接卡片可以拖动调整位置</p>
               </div>
             </div>
             
@@ -42,11 +42,16 @@ export default function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
                 <p className="text-sm">3. 背景设置中自己上传图片会被编码成 base64</p>
               </div>
             </div>
+
+            <div className="flex">
+              <div className="text-gray-800 dark:text-white">
+                <p className="text-sm">4. 点击右键菜单可以编辑或删除链接</p>
+              </div>
+            </div>            
             
             <div className="flex">
               <div>
-                <p className="text-sm">4. 更多开发和使用可以访问</p>
-                <a href="https://hin.cool" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">我的博客</a>
+                <p className="text-sm">5. 更多开发和使用可以访问 <a href="https://hin.cool" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">我的博客</a></p>
               </div>
             </div>
           </div>

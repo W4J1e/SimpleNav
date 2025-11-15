@@ -11,47 +11,102 @@ interface LinksGridProps {
   onEditLink: (link: Link) => void;
   onDeleteLink: (link: Link) => void;
   onAddLink: () => void;
+  onLinksReorder: (newOrder: Link[]) => void;
 }
 
-export default function LinksGrid({ links, layout, selectedCategory, onEditLink, onDeleteLink, onAddLink }: LinksGridProps) {
-  const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
-  
+export default function LinksGrid({ links, layout, selectedCategory, onEditLink, onDeleteLink, onAddLink, onLinksReorder }: LinksGridProps) {
   // 确保links是数组
   const safeLinks = Array.isArray(links) ? links : [];
   
-  // 长按事件处理
-  const handleLongPressStart = (linkId: string) => {
-    const timer = setTimeout(() => {
-      setEditingLinkId(linkId);
-    }, 500); // 500ms长按时间
-    setLongPressTimer(timer);
+  // 右键菜单状态
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    link: Link | null;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    link: null,
+  });
+  
+  // 关闭右键菜单
+  const closeContextMenu = () => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
   };
-
-  const handleLongPressEnd = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-  };
-
-  const handleClickOutside = () => {
-    setEditingLinkId(null);
-  };
-
-  // 点击外部区域退出编辑模式
+  
+  // 点击外部区域关闭右键菜单
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (editingLinkId && !(e.target as Element).closest('.link-card')) {
-        setEditingLinkId(null);
-      }
+    const handleClick = () => {
+      closeContextMenu();
     };
 
     document.addEventListener('click', handleClick);
     return () => {
       document.removeEventListener('click', handleClick);
     };
-  }, [editingLinkId]);
+  }, []);
+  
+  // 右键菜单处理
+  const handleContextMenu = (e: React.MouseEvent, link: Link) => {
+    e.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      link: link,
+    });
+  };
+  
+  // 拖动排序状态
+  const [draggedLinkId, setDraggedLinkId] = useState<string | null>(null);
+  const [draggedOverLinkId, setDraggedOverLinkId] = useState<string | null>(null);
+  
+  // 拖动开始
+  const handleDragStart = (e: React.DragEvent, link: Link) => {
+    setDraggedLinkId(link.id);
+    e.dataTransfer.effectAllowed = 'move';
+    // 设置拖动时的视觉反馈
+    if (e.dataTransfer.setDragImage) {
+      const dragElement = e.currentTarget as HTMLElement;
+      e.dataTransfer.setDragImage(dragElement, dragElement.clientWidth / 2, dragElement.clientHeight / 2);
+    }
+  };
+  
+  // 拖动过程中经过其他链接卡片
+  const handleDragOver = (e: React.DragEvent, link: Link) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedLinkId !== link.id) {
+      setDraggedOverLinkId(link.id);
+    }
+  };
+  
+  // 拖动结束
+  const handleDragEnd = () => {
+    if (draggedLinkId && draggedOverLinkId && draggedLinkId !== draggedOverLinkId) {
+      // 执行链接顺序交换
+      const draggedIndex = safeLinks.findIndex(l => l.id === draggedLinkId);
+      const overIndex = safeLinks.findIndex(l => l.id === draggedOverLinkId);
+      
+      if (draggedIndex !== -1 && overIndex !== -1) {
+        const newLinks = [...safeLinks];
+        const [draggedLink] = newLinks.splice(draggedIndex, 1);
+        newLinks.splice(overIndex, 0, draggedLink);
+        onLinksReorder(newLinks);
+      }
+    }
+    
+    // 重置拖动状态
+    setDraggedLinkId(null);
+    setDraggedOverLinkId(null);
+  };
+  
+  // 拖动离开链接卡片
+  const handleDragLeave = () => {
+    setDraggedOverLinkId(null);
+  };
   
   // 过滤链接
   let filteredLinks = safeLinks;
@@ -105,14 +160,17 @@ export default function LinksGrid({ links, layout, selectedCategory, onEditLink,
             className={layout === 'masonry' ? 'masonry-item' : ''}
           >
             <div 
-              className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative ${
-                editingLinkId === link.id ? 'ring-2 ring-blue-400' : ''
-              } dark:bg-gray-800/80 dark:hover:bg-gray-700/80`}
-              onMouseDown={() => handleLongPressStart(link.id)}
-              onMouseUp={handleLongPressEnd}
-              onMouseLeave={handleLongPressEnd}
-              onTouchStart={() => handleLongPressStart(link.id)}
-              onTouchEnd={handleLongPressEnd}
+              className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${
+                draggedLinkId === link.id ? 'opacity-50 transform scale-105' : ''
+              } ${
+                draggedOverLinkId === link.id ? 'ring-2 ring-blue-400' : ''
+              }`}
+              onContextMenu={(e) => handleContextMenu(e, link)}
+              draggable="true"
+              onDragStart={(e) => handleDragStart(e, link)}
+              onDragOver={(e) => handleDragOver(e, link)}
+              onDragEnd={handleDragEnd}
+              onDragLeave={handleDragLeave}
             >
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-4 w-full">
@@ -136,72 +194,8 @@ export default function LinksGrid({ links, layout, selectedCategory, onEditLink,
                   </div>
                   <span className="font-medium truncate text-lg">{link.name}</span>
                 </div>
-                {editingLinkId === link.id && (
-                  <div className="edit-link flex gap-1 z-10">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditLink(link);
-                        setEditingLinkId(null);
-                      }}
-                      className="p-2 hover:bg-white/30 rounded-full bg-white/20 text-white font-medium"
-                      title="编辑链接"
-                    >
-                      <i className="fa fa-pencil"></i>
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteLink(link);
-                        setEditingLinkId(null);
-                      }}
-                      className="p-2 hover:bg-red-500/30 rounded-full bg-red-500/20 text-red-200 font-medium"
-                      title="删除链接"
-                    >
-                      <i className="fa fa-trash"></i>
-                    </button>
-                  </div>
-                )}
               </div>
-              {editingLinkId !== link.id && (
-                <a href={link.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>
-              )}
-              {editingLinkId === link.id && (
-                <div className="absolute inset-0 bg-black/40 rounded-xl flex flex-col items-center justify-center z-0">
-                  <span className="text-white text-sm font-medium mb-2">编辑模式</span>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditLink(link);
-                        setEditingLinkId(null);
-                      }}
-                      className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm font-medium"
-                    >
-                      编辑
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteLink(link);
-                        setEditingLinkId(null);
-                      }}
-                      className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm font-medium"
-                    >
-                      删除
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingLinkId(null);
-                      }}
-                      className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium"
-                    >
-                      取消
-                    </button>
-                  </div>
-                </div>
-              )}
+              <a href={link.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>
             </div>
           </div>
         ))}
@@ -216,6 +210,45 @@ export default function LinksGrid({ links, layout, selectedCategory, onEditLink,
           </div>
         </div>
       </div>
+      
+      {/* 右键菜单 */}
+      {contextMenu.visible && contextMenu.link && (
+        <div 
+          className="fixed z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-1 dark:bg-gray-800/90"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+        >
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(contextMenu.link!.url, '_blank', 'noopener noreferrer');
+              closeContextMenu();
+            }}
+            className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md text-sm dark:text-white dark:hover:bg-gray-700"
+          >
+            <i className="fa fa-external-link-alt mr-2"></i>新标签页打开
+          </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditLink(contextMenu.link!);
+              closeContextMenu();
+            }}
+            className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md text-sm dark:text-white dark:hover:bg-gray-700"
+          >
+            <i className="fa fa-pencil mr-2"></i>编辑
+          </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteLink(contextMenu.link!);
+              closeContextMenu();
+            }}
+            className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-md text-sm dark:text-white dark:hover:bg-gray-700"
+          >
+            <i className="fa fa-trash mr-2"></i>删除
+          </button>
+        </div>
+      )}
     </div>
   );
 }
