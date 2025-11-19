@@ -45,9 +45,17 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
           if (response.ok) {
             const data = await response.json();
             // 保存用户信息
-            if (data.user) {
+            if (data.user && data.authenticated) {
               setUserInfo(data.user);
+            } else {
+              // 服务器返回未认证，清除本地状态
+              setIsAuthenticated(false);
+              setUserInfo(null);
             }
+          } else {
+            // 获取用户信息失败，设为未认证状态
+            setIsAuthenticated(false);
+            setUserInfo(null);
           }
         } else {
           // 令牌无效，尝试从服务器获取新的认证状态
