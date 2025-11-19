@@ -54,16 +54,21 @@ export default function HomePage() {
           setIsAuthenticated(true);
           
           // 如果启用了OneDrive存储并且认证状态发生了变化或首次认证成功，尝试同步数据
-        if (useOneDriveStorage() && (!wasAuthenticated || !wasInitializedRef.current)) {
-          await syncFromOneDrive();
-          // 重新加载数据
-          setLinks(getLinks());
-          // 仅当设置发生变化时才更新settings状态
-          const newSettings = getSettings();
-          if (JSON.stringify(newSettings) !== JSON.stringify(settings)) {
-            setSettings(newSettings);
+          // 但不等待同步完成，在后台进行
+          if (useOneDriveStorage() && (!wasAuthenticated || !wasInitializedRef.current)) {
+            // 在后台同步OneDrive数据，不阻塞页面渲染
+            syncFromOneDrive().then(success => {
+              if (success) {
+                // 同步成功后更新页面数据
+                setLinks(getLinks());
+                // 仅当设置发生变化时才更新settings状态
+                const newSettings = getSettings();
+                if (JSON.stringify(newSettings) !== JSON.stringify(settings)) {
+                  setSettings(newSettings);
+                }
+              }
+            });
           }
-        }
         } else {
           // 认证无效或已过期，清除状态
           oneDriveStorage.clearUserToken();
@@ -93,7 +98,7 @@ export default function HomePage() {
     const intervalId = setInterval(checkInitialAuthStatus, 60000);
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [settings]);
 
   // 预加载图片函数
   const preloadImage = (url: string): Promise<string> => {
