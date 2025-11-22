@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // 获取访问令牌
-    const { accessToken, refreshToken } = await getAccessToken(code);
+    // 获取访问令牌，包含过期时间
+    const { accessToken, refreshToken, expiresIn } = await getAccessToken(code);
     
     // 获取用户信息
     const userResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
@@ -67,13 +67,14 @@ export async function GET(request: NextRequest) {
     
     const userData = await userResponse.json();
     
-    // 创建JWT令牌
+    // 创建JWT令牌，包含expiresIn以便记录accessToken过期时间
     const token = createJWTToken({
       id: userData.id,
       displayName: userData.displayName,
       email: userData.mail || userData.userPrincipalName,
       accessToken,
-      refreshToken
+      refreshToken,
+      expiresIn // 传递expiresIn参数，用于计算accessToken过期时间
     });
     
     // 使用实际的基础URL，考虑EdgeOne Pages的代理情况

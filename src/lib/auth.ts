@@ -98,6 +98,10 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
   refreshToken: string;
   expiresIn: number;
 }> {
+  if (!refreshToken) {
+    throw new Error('刷新令牌为空');
+  }
+  
   const tokenUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/token`;
   
   const body = new URLSearchParams({
@@ -108,31 +112,53 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
     client_secret: azureConfig.clientSecret
   });
   
-  const response = await fetch(tokenUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: body.toString()
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`刷新访问令牌失败: ${errorData.error_description || response.statusText}`);
+  try {
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: body.toString()
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error_description || errorData.error || response.statusText;
+      console.error('刷新令牌API返回错误:', errorMessage, errorData);
+      throw new Error(`刷新访问令牌失败: ${errorMessage}`);
+    }
+    
+    const data = await response.json();
+    
+    // 验证返回的数据格式
+    if (!data.access_token || typeof data.expires_in !== 'number') {
+      throw new Error('无效的刷新令牌响应格式');
+    }
+    
+    console.log('令牌刷新成功，新的过期时间:', data.expires_in, '秒');
+    
+    return {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token || refreshToken, // 有时刷新令牌不会返回
+      expiresIn: data.expires_in
+    };
+  } catch (error: any) {
+    console.error('刷新令牌过程发生异常:', error.message);
+    throw error;
   }
-  
-  const data = await response.json();
-  
-  return {
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token || refreshToken, // 有时刷新令牌不会返回
-    expiresIn: data.expires_in
-  };
 }
 
 // 创建JWT令牌
 export function createJWTToken(payload: any): string {
-  return jwt.sign(payload, azureConfig.jwtSecret, { expiresIn: '7d' });
+  // 添加accessToken过期时间戳，基于expiresIn计算
+  const tokenPayload = {
+    ...payload,
+    // 如果有expiresIn字段，计算过期时间戳
+    ...(payload.expiresIn ? { 
+      accessTokenExpiresAt: Math.floor(Date.now() / 1000) + payload.expiresIn 
+    } : {})
+  };
+  return jwt.sign(tokenPayload, azureConfig.jwtSecret, { expiresIn: '90d' });
 }
 
 // 验证JWT令牌
@@ -221,7 +247,7 @@ export function setAuthCookie(res: NextResponse, token: string, request?: NextRe
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7天
+    maxAge: 90 * 24 * 60 * 60 * 1000, // 90天
     path: '/'
   };
   

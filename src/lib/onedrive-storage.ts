@@ -55,36 +55,49 @@ export class OneDriveStorage {
     return !!this.userToken;
   }
 
-  // 验证令牌有效性并刷新（如果需要）
+  // 验证并刷新令牌
   async validateAndRefreshToken(): Promise<boolean> {
-    if (!this.userToken) {
-      return false;
-    }
-
     try {
-      // 调用认证状态API检查令牌有效性
+      console.log('开始验证并刷新令牌...');
+      
+      // 检查是否有本地存储的token信息
+      if (!this.userToken) {
+        console.log('没有找到用户令牌，返回无效');
+        return false;
+      }
+      
+      // 调用status API验证和刷新令牌
       const response = await fetch('/api/auth/status', {
         method: 'GET',
-        credentials: 'include',
         headers: {
+          'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate'
-        }
+        },
+        credentials: 'include' // 确保包含cookies
       });
 
+      if (!response.ok) {
+        throw new Error(`验证令牌请求失败: ${response.status} ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log('令牌验证结果:', { authenticated: data.authenticated });
 
       if (data.authenticated && data.accessToken && data.refreshToken) {
         // 令牌有效，更新本地令牌
         this.setUserToken(data.accessToken, data.refreshToken);
+        console.log('令牌已更新，验证成功');
         return true;
       } else {
         // 令牌无效，清除本地令牌
         this.clearUserToken();
+        console.log('令牌无效，已清除');
         return false;
       }
     } catch (error) {
-      // 网络错误或其他错误，认为令牌无效
-      this.clearUserToken();
+      // 网络错误或其他错误，记录错误但不立即清除令牌
+      console.error('验证令牌时出错:', error instanceof Error ? error.message : '未知错误');
+      // 不再自动清除令牌，让上层应用决定如何处理
       return false;
     }
   }

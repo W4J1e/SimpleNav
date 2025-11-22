@@ -18,11 +18,11 @@ export default function ZhihuHotBoardDialog({ isOpen, onClose }: ZhihuHotBoardDi
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 移除对话框打开时的自动刷新，只在组件首次加载时初始化一次
   useEffect(() => {
-    if (isOpen) {
-      fetchHotBoardData();
-    }
-  }, [isOpen]);
+    // 组件首次加载时初始化数据
+    fetchHotBoardData();
+  }, []);
 
   const fetchHotBoardData = async () => {
     setIsLoading(true);

@@ -47,10 +47,33 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // 尝试验证Microsoft OAuth访问令牌是否有效，如果无效则刷新
+    // 尝试验证Microsoft OAuth访问令牌是否有效，如果无效或接近过期则刷新
     let accessToken = user.accessToken;
     let refreshToken = user.refreshToken;
     let tokenRefreshed = false;
+    const now = Math.floor(Date.now() / 1000);
+    
+    // 检查token是否接近过期（剩余时间少于10分钟）
+    if (user.accessTokenExpiresAt) {
+      const timeRemaining = user.accessTokenExpiresAt - now;
+      console.log(`当前token剩余有效时间: ${Math.floor(timeRemaining / 60)} 分钟`);
+      
+      // 如果token剩余时间少于10分钟，主动刷新
+      if (timeRemaining < 600) { // 600秒 = 10分钟
+        console.log('Token接近过期，主动刷新...');
+        if (user.refreshToken) {
+          try {
+            const refreshedTokens = await refreshAccessToken(user.refreshToken);
+            accessToken = refreshedTokens.accessToken;
+            refreshToken = refreshedTokens.refreshToken;
+            tokenRefreshed = true;
+          } catch (refreshError) {
+            console.error('主动刷新令牌失败:', refreshError);
+            // 继续使用原token，后面会通过API调用验证是否还可用
+          }
+        }
+      }
+    }
     
     // 尝试获取用户头像来验证访问令牌是否有效
     if (user.accessToken) {
@@ -58,7 +81,7 @@ export async function GET(request: NextRequest) {
         // 尝试使用当前访问令牌获取用户头像
         await getUserPhoto(user.accessToken);
       } catch (error) {
-        console.log('访问令牌可能已过期，尝试刷新...');
+        console.log('访问令牌可能已过期或无效，尝试刷新...');
         
         // 访问令牌可能已过期，尝试使用刷新令牌获取新令牌
         if (user.refreshToken) {
@@ -82,14 +105,18 @@ export async function GET(request: NextRequest) {
     // 如果令牌已刷新，更新JWT令牌
     let updatedUser = user;
     if (tokenRefreshed) {
+      // 获取刷新令牌时返回的expiresIn值（通常为3600秒）
+      const expiresIn = 3600; // Microsoft Graph API的accessToken默认过期时间为1小时
+      
       // 更新用户信息中的令牌
       updatedUser = {
         ...user,
         accessToken,
-        refreshToken
+        refreshToken,
+        expiresIn // 传递expiresIn参数，用于计算accessToken过期时间
       };
       
-      // 创建新的JWT令牌
+      // 创建新的JWT令牌，包含expiresIn
       const newJWT = createJWTToken(updatedUser);
       
       // 创建响应对象
