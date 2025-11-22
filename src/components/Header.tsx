@@ -21,7 +21,7 @@ export default function Header({ onToggleAddLink, onToggleTheme, onToggleUnified
           onClick={onToggleTheme}
           className="p-2 rounded-full hover:bg-white/10 transition-all"
         >
-          <i className={`fas ${darkMode ? 'fa-sun-o' : 'fa-moon-o'}`}></i>
+          <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`}></i>
         </button>
       </div>
     </header>
