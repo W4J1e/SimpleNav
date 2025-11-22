@@ -65,21 +65,21 @@ export default function ZhihuHotBoardDialog({ isOpen, onClose }: ZhihuHotBoardDi
       <div className="bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 rounded-lg shadow-xl w-full max-w-2xl mx-4 transform transition-transform duration-300 scale-100 max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between p-6 pb-2 sticky top-0 bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 z-10 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            <i className="fa fa-fire text-orange-500 mr-2"></i>知乎热榜
+            <i className="fas fa-fire text-orange-500 mr-2"></i>知乎热榜
           </h2>
           <div className="flex items-center gap-3">
             <button
-              onClick={fetchHotBoardData}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-              title="刷新热榜"
-            >
-              <i className="fa fa-refresh"></i>
-            </button>
+            onClick={fetchHotBoardData}
+            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            title="刷新热榜"
+          >
+            <i className="fas fa-arrows-rotate"></i>
+          </button>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             >
-              <i className="fa fa-times text-lg"></i>
+              <i className="fas fa-times text-lg"></i>
             </button>
           </div>
         </div>
@@ -89,12 +89,12 @@ export default function ZhihuHotBoardDialog({ isOpen, onClose }: ZhihuHotBoardDi
         <div className="space-y-4">
           {isLoading ? (
             <div className="text-center py-10">
-              <i className="fa fa-spinner fa-spin text-xl text-gray-400"></i>
+              <i className="fas fa-spinner fa-spin text-xl text-gray-400"></i>
               <p className="mt-2 text-gray-500 dark:text-gray-400">加载中...</p>
             </div>
           ) : error ? (
             <div className="text-center py-10 text-red-500">
-              <i className="fa fa-exclamation-circle text-xl mb-2"></i>
+              <i className="fas fa-circle-exclamation text-xl mb-2"></i>
               <p>{error}</p>
               <button 
                 onClick={fetchHotBoardData}
@@ -126,7 +126,7 @@ export default function ZhihuHotBoardDialog({ isOpen, onClose }: ZhihuHotBoardDi
                       </a>
                       <div className="mt-1 flex items-center">
                         <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                          <i className="fa fa-fire text-orange-400 mr-1"></i>
+                          <i className="fas fa-fire text-orange-400 mr-1"></i>
                           {item.hot}
                         </span>
                       </div>

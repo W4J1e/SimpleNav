@@ -17,7 +17,6 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
-        <link href="https://cdn.jsdmirror.com/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
       </head>
       <body className="font-sans min-h-screen flex flex-col transition-all duration-700" 
             style={{

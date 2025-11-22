@@ -18,13 +18,13 @@ export const defaultSettings: Settings = {
 // 默认链接
 export const defaultLinks: Link[] = [
   {
-    id: '1',
-    name: 'GitHub',
-    url: 'https://github.com',
-    icon: 'fab fa-github',
-    category: '开发',
-    useFavicon: false
-  },
+      id: '1',
+      name: 'GitHub',
+      url: 'https://github.com',
+      icon: 'fab fa-github',
+      category: '开发',
+      useFavicon: false
+    },
   {
     id: '2',
     name: 'W4J1e',
@@ -50,14 +50,13 @@ export const defaultLinks: Link[] = [
     useFavicon: true
   },
   {
-    id: '5',
-    name: '多吉云',
-    url: 'https://www.dogecloud.com/?iuid=2384',
-    icon: 'fas fa-cloud',
-    category: '开发',
-    useFavicon: false
-  }  
-];
+      id: '5',
+      name: '多吉云',
+      url: 'https://www.dogecloud.com/?iuid=2384',
+      icon: 'fas fa-cloud',
+      category: '开发',
+      useFavicon: false
+    }];
 
 // 存储键名
 const STORAGE_KEYS = {

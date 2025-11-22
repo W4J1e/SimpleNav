@@ -30,8 +30,8 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
     <div className="w-full max-w-2xl mb-8">
       <div className="relative">
         <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-          <i className="fa fa-search text-xl text-white/80"></i>
-        </div>
+            <i className="fas fa-search text-xl text-white/80"></i>
+          </div>
         <input 
           ref={searchInputRef}
           type="text" 
@@ -45,7 +45,7 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
           onClick={performSearch}
           className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-all"
         >
-          <i className="fa fa-arrow-right text-xl"></i>
+          <i className="fas fa-arrow-right text-xl"></i>
         </button>
       </div>
     </div>

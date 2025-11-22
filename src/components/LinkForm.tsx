@@ -77,8 +77,8 @@ export default function LinkForm({ isOpen, onClose, onSave, link }: LinkFormProp
               {link ? '编辑链接' : '添加链接'}
             </h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-gray-700 dark:text-gray-300">
-              <i className="fa fa-times"></i>
-            </button>
+            <i className="fas fa-times"></i>
+          </button>
           </div>
         </div>
         <div className="p-6">
@@ -123,7 +123,7 @@ export default function LinkForm({ isOpen, onClose, onSave, link }: LinkFormProp
                   onClick={handleFetchIcon}
                   className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-3 rounded-lg transition-all text-gray-700 dark:text-gray-300"
                 >
-                  <i className="fa fa-search"></i>
+                  <i className="fas fa-search"></i>
                 </button>
               </div>
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">

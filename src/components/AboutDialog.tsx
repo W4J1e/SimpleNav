@@ -19,7 +19,7 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           >
-            <i className="fa fa-times text-lg"></i>
+            <i className="fas fa-times text-lg"></i>
           </button>
         </div>
         
@@ -35,7 +35,7 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
           <div className="border-t dark:border-gray-700 pt-4">
             <div className="space-y-3">
               <div className="flex items-center">
-                <i className="fa fa-user text-blue-500 mr-3"></i>
+                <i className="fas fa-user text-blue-500 mr-3"></i>
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">作者</p>
                   <a href="https://hin.cool" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">W4J1e</a>
@@ -43,7 +43,7 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               </div>
               
               <div className="flex items-center">
-                <i className="fa fa-cog text-blue-500 mr-3"></i>
+                <i className="fas fa-cog text-blue-500 mr-3"></i>
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">主要功能</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -53,7 +53,7 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               </div>
               
               <div className="flex items-center">
-                <i className="fa fa-heart text-red-500 mr-3"></i>
+                <i className="fas fa-heart text-red-500 mr-3"></i>
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">开源项目</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">

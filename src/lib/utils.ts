@@ -24,9 +24,21 @@ export const getIconFromUrl = (url: string): string => {
     const parsedUrl = new URL(url);
     const domain = parsedUrl.hostname.replace('www.', '');
     const iconName = domain.split('.')[0];
-    return `fa-${iconName}`;
+    
+    // 品牌图标列表，这些应该使用fab前缀
+    const brandIcons = [
+      'github', 'twitter', 'facebook', 'youtube', 'instagram', 'linkedin', 
+      'google', 'apple', 'microsoft', 'amazon', 'slack', 'discord', 
+      'telegram', 'whatsapp', 'messenger', 'pinterest', 'reddit', 'twitch'
+    ];
+    
+    if (brandIcons.includes(iconName)) {
+      return `fab fa-${iconName}`;
+    } else {
+      return `fas fa-${iconName}`;
+    }
   } catch (e) {
-    return 'fa-link';
+    return 'fas fa-link';
   }
 };
 

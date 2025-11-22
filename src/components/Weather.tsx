@@ -56,24 +56,24 @@ export default function Weather() {
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-white text-sm">
-        <i className="fa fa-spinner fa-spin"></i>
-        <span>加载天气...</span>
-      </div>
+          <i className="fas fa-spinner fa-spin"></i>
+          <span>加载天气...</span>
+        </div>
     );
   }
 
   if (error || !weatherData) {
     return (
       <div className="flex items-center gap-2 text-white text-sm">
-        <i className="fa fa-cloud"></i>
-        <span>天气不可用</span>
-      </div>
+          <i className="fas fa-cloud"></i>
+          <span>天气不可用</span>
+        </div>
     );
   }
 
   return (
     <div className="flex items-center gap-3 text-white text-sm hover:opacity-90 transition-opacity cursor-pointer">
-      <i className={`fa ${getWeatherIcon(weatherData.icon)}`} style={{ fontSize: '1.2rem' }}></i>
+          <i className={`fas ${getWeatherIcon(weatherData.icon)}`} style={{ fontSize: '1.2rem' }}></i>
       <div>
         <div className="font-medium">{weatherData.city}</div>
         <div>{weatherData.tempC}°C {weatherData.weather}</div>
@@ -84,24 +84,24 @@ export default function Weather() {
   // 根据天气图标返回对应的Font Awesome图标
   function getWeatherIcon(icon: string): string {
     const iconMap: Record<string, string> = {
-      '01d': 'fa-sun-o',       // 晴天
-      '02d': 'fa-cloud-sun-o', // 少云
-      '03d': 'fa-cloud',       // 多云
-      '04d': 'fa-cloud',       // 阴
-      '09d': 'fa-tint',        // 小雨
-      '10d': 'fa-tint',        // 中雨
-      '11d': 'fa-bolt',        // 雷雨
-      '13d': 'fa-snowflake-o', // 雪
-      '50d': 'fa-cloud',       // 雾
-      '01n': 'fa-moon-o',      // 晴（夜间）
-      '02n': 'fa-cloud-moon-o', // 少云（夜间）
-      '03n': 'fa-cloud',       // 多云（夜间）
-      '04n': 'fa-cloud',       // 阴（夜间）
-      '09n': 'fa-tint',        // 小雨（夜间）
-      '10n': 'fa-tint',        // 中雨（夜间）
-      '11n': 'fa-bolt',        // 雷雨（夜间）
-      '13n': 'fa-snowflake-o', // 雪（夜间）
-      '50n': 'fa-cloud'        // 雾（夜间）
+      '01d': 'fa-sun',       // 晴天
+      '02d': 'fa-cloud-sun', // 少云
+      '03d': 'fa-cloud',     // 多云
+      '04d': 'fa-cloud',     // 阴
+      '09d': 'fa-tint',      // 小雨
+      '10d': 'fa-tint',      // 中雨
+      '11d': 'fa-bolt',      // 雷雨
+      '13d': 'fa-snowflake', // 雪
+      '50d': 'fa-smog',      // 雾
+      '01n': 'fa-moon',      // 晴（夜间）
+      '02n': 'fa-cloud-moon', // 少云（夜间）
+      '03n': 'fa-cloud',     // 多云（夜间）
+      '04n': 'fa-cloud',     // 阴（夜间）
+      '09n': 'fa-tint',      // 小雨（夜间）
+      '10n': 'fa-tint',      // 中雨（夜间）
+      '11n': 'fa-bolt',      // 雷雨（夜间）
+      '13n': 'fa-snowflake', // 雪（夜间）
+      '50n': 'fa-smog'       // 雾（夜间）
     };
     
     return iconMap[icon] || 'fa-cloud';
