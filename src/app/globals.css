@@ -1,0 +1,177 @@
+/* 引入FontAwesome CSS */
+@import '@fortawesome/fontawesome-free/css/all.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-image: none;
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --bg-size: cover;
+  --bg-position: center;
+  --bg-repeat: no-repeat;
+}
+
+/* 深色模式样式 */
+.dark {
+  --bg-color: #1a1a2e;
+  --text-color: #ffffff;
+}
+
+/* 确保body背景样式正确应用 */
+body {
+  background-image: var(--bg-image);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  background-size: var(--bg-size, cover);
+  background-position: var(--bg-position, center);
+  background-repeat: var(--bg-repeat, no-repeat);
+  background-attachment: fixed;
+  min-height: 100vh;
+  transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* 为body添加半透明遮罩层，确保文字对比度 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 深色模式下的背景遮罩效果增强 */
+.dark body::before {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* 确保所有内容都在遮罩层之上 */
+body > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* 全局滚动条样式 */
+body::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.6);
+  border-radius: 2px;
+  border: 0px solid transparent;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.8);
+}
+
+/* 深色模式下的全局滚动条 */
+.dark body::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 114, 128, 0.5);
+}
+
+.dark body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.8);
+}
+
+@layer utilities {
+    .content-auto {
+        content-visibility: auto;
+    }
+    /* 自定义滚动条样式 */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(96, 165, 250, 0.6);
+        border-radius: 2px;
+        border: 0px solid transparent;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(156, 163, 175, 0.8);
+    }
+    
+    /* 深色模式下的滚动条 */
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(107, 114, 128, 0.5);
+    }
+    
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(107, 114, 128, 0.8);
+    }
+    .bg-blur {
+        backdrop-filter: blur(8px);
+    }
+    .transition-transform-opacity {
+        transition-property: transform, opacity;
+    }
+    .scale-hover {
+        @apply hover:scale-105 transition-all duration-300;
+    }
+    .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .link-card {
+        @apply relative cursor-pointer;
+    }
+    .link-card .edit-link {
+        @apply opacity-0 group-hover:opacity-100 transition-opacity;
+    }
+    .masonry-grid {
+        column-count: 2;
+        column-gap: 0.75rem;
+    }
+    @screen sm {
+        .masonry-grid {
+            column-count: 3;
+        }
+    }
+    @screen md {
+        .masonry-grid {
+            column-count: 4;
+        }
+    }
+    @screen lg {
+        .masonry-grid {
+            column-count: 5;
+        }
+    }
+    .masonry-item {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+    }
+    /* 增强文字可读性的工具类 */
+    .text-readable {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    /* 深色模式下的文字阴影调整 */
+    .dark .text-readable {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+}
