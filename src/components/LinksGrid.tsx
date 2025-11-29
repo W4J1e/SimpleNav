@@ -332,7 +332,7 @@ export default function LinksGrid({
 
   const getGridClasses = () => {
     if (layout === 'grid' || layout === 'list') {
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4';
+      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4';
     } else if (layout === 'masonry') {
       return 'masonry-grid';
     }
@@ -340,7 +340,7 @@ export default function LinksGrid({
   };
 
   return (
-    <div className="w-full max-w-5xl">
+    <div className="w-full max-w-7xl">
       <div id="category-tabs" className="flex overflow-x-auto pb-4 mb-6 gap-2 scrollbar-hide">
         {categories.map(category => (
           <button 

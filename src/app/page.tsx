@@ -476,13 +476,13 @@ export default function HomePage() {
         darkMode={settings.darkMode}
       />
       
-      <main className="flex-grow p-6 md:p-12 flex flex-col items-center justify-center">
+      <main className="flex-grow p-6 md:p-12 flex flex-col items-center">
         <Search 
           searchEngine={settings.searchEngine}
           onSearchEngineChange={handleSearchEngineChange}
         />
         
-        <div className="w-full max-w-4xl mt-8">
+        <div className="w-full max-w-7xl mt-8">
           {/* 链接网格 - 包含所有卡片，包括待办组件 */}
           <LinksGrid 
             links={links}

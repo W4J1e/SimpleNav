@@ -185,10 +185,10 @@ export default function Weather() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <i className="fas fa-wind text-gray-300"></i>
+              <i className="fas fa-cloud-rain text-gray-300"></i>
               <div>
-                <div className="text-xs opacity-80">风力</div>
-                <div>{todayWeather.windScale}级</div>
+                <div className="text-xs opacity-80">降水概率</div>
+                <div>{todayWeather.precip}</div>
               </div>
             </div>
           </div>
@@ -233,15 +233,15 @@ export default function Weather() {
       // 阴天
       '9': 'fa-cloud',
       // 雨天
-      '10': 'fa-tint',
-      '11': 'fa-tint',
-      '12': 'fa-tint',
-      '13': 'fa-tint',
-      '14': 'fa-tint',
-      '15': 'fa-tint',
-      '16': 'fa-tint',
-      '17': 'fa-tint',
-      '18': 'fa-tint',
+      '10': 'fa-cloud-rain',
+      '11': 'fa-cloud-rain',
+      '12': 'fa-cloud-rain',
+      '13': 'fa-cloud-rain',
+      '14': 'fa-cloud-rain',
+      '15': 'fa-cloud-rain',
+      '16': 'fa-cloud-rain',
+      '17': 'fa-cloud-rain',
+      '18': 'fa-cloud-rain',
       // 雷雨
       '19': 'fa-bolt',
       '20': 'fa-bolt',
