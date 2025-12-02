@@ -1,7 +1,7 @@
 'use client';
 
 import { Link as LinkType, TodoItem } from '../types/index';
-import { getBetterFaviconUrl } from '../lib/utils';
+import { getFaviconUrl, getBetterFaviconUrl } from '../lib/utils';
 import { useState, useEffect } from 'react';
 import TodoDialog from './TodoDialog';
 import MovieCalendarDialog from './MovieCalendarDialog';
@@ -510,17 +510,19 @@ export default function LinksGrid({
                     <div className="flex items-center gap-4 w-full">
                       <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
                         {link.useFavicon ? (
-                          <img 
-                            src={getBetterFaviconUrl(link.url)} 
-                            alt={`${link.name}图标`} 
-                            className="w-10 h-10 rounded" 
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              const defaultIcon = document.createElement('i');
-                              defaultIcon.className = 'fas fa-link text-2xl';
-                              e.currentTarget.parentNode?.insertBefore(defaultIcon, e.currentTarget.nextSibling);
-                            }}
-                          />
+                          <div className="relative w-10 h-10 rounded">
+                            {/* 首先尝试直接获取网站的favicon.ico */}
+                            <img 
+                              src={getFaviconUrl(link.url)} 
+                              alt={`${link.name}图标`} 
+                              className="w-full h-full rounded" 
+                              onError={(e) => {
+                                // 直接获取失败，切换到favicon.im API（带?larger=true参数）
+                                const imgElement = e.currentTarget as HTMLImageElement;
+                                imgElement.src = getBetterFaviconUrl(link.url) || '';
+                              }}
+                            />
+                          </div>
                         ) : (
                           <i className={`${link.icon || 'fas fa-link'} text-3xl`}></i>
                         )}

@@ -1,20 +1,43 @@
-// 获取网站favicon
-export const getFaviconUrl = (url: string): string => {
+// 获取网站favicon - 默认方式：直接获取网站的favicon.ico
+export const getFaviconUrl = (url: string): string | undefined => {
+  let parsedUrl;
+  
+  // 尝试解析URL
   try {
-    const parsedUrl = new URL(url);
-    return `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
+    parsedUrl = new URL(url);
   } catch (e) {
-    return 'https://picsum.photos/32/32';
+    // URL解析失败，返回undefined触发onError事件
+    return undefined;
+  }
+  
+  // URL解析成功，返回favicon.ico链接
+  if (parsedUrl) {
+    return `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
+  } else {
+    // 理论上不会执行到这里，但作为后备
+    return undefined;
   }
 };
 
-// 改进的favicon获取方法，不使用Google服务
-export const getBetterFaviconUrl = (url: string): string => {
+// 改进的favicon获取方法 - 使用Favicon.im API获取（带大尺寸参数）
+export const getBetterFaviconUrl = (url: string): string | undefined => {
+  let parsedUrl;
+  
+  // 尝试解析URL
   try {
-    const parsedUrl = new URL(url);
-    return `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
+    parsedUrl = new URL(url);
   } catch (e) {
-    return 'https://picsum.photos/32/32';
+    // URL解析失败，返回undefined触发onError事件
+    return undefined;
+  }
+  
+  // URL解析成功，返回Favicon.im API链接（带?larger=true参数获取大尺寸图标）
+  if (parsedUrl) {
+    const domain = parsedUrl.hostname;
+    return `https://favicon.im/${domain}?larger=true`;
+  } else {
+    // 理论上不会执行到这里，但作为后备
+    return undefined;
   }
 };
 

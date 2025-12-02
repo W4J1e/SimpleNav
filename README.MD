@@ -155,7 +155,13 @@ NEXT_PUBLIC_SENIVERSE_API_KEY=your_seniverse_api_key
 
 ## 贡献
 
-感谢 [upapi](https://uapis.cn/) 提供的 API
+感谢 [upapi](https://uapis.cn/) 提供的知乎热榜 API，
+
+感谢[此刻电影](https://www.cikeee.com/) 提供的电影日历 API，
+
+感谢 [bing.img.run](https://bing.img.run/) 提供的 Bing 图片 API，
+
+感谢[Favicon.im](https://favicon.im/) 提供的 Favicon API。
 
 欢迎提交 Issue 和 Pull Request！
 

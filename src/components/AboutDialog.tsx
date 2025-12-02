@@ -29,7 +29,7 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               <img src="/favicon.ico" alt="网站图标" className="w-full h-full object-contain" />
             </div>
             <h3 className="text-lg font-medium text-gray-800 dark:text-white">SimpleNav</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">v0.1.1</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">v0.1.2</p>
           </div>
           
           <div className="border-t dark:border-gray-700 pt-4">
@@ -60,6 +60,18 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
                     基于 Next.js + React + TypeScript + Tailwind CSS 构建
                   </p>
                 </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t dark:border-gray-700 pt-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">鸣谢</p>
+              <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                <p>感谢 <a href="https://uapis.cn/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">uapis.cn</a> 提供的知乎热榜 API</p>
+                <p>感谢 <a href="https://www.cikeee.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">cikeee.com</a> 提供的电影日历 API</p>
+                <p>感谢 <a href="https://bing.img.run/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">bing.img.run</a> 提供的 Bing 图片 API</p>
+                <p>感谢 <a href="https://favicon.im/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">favicon.im</a> 提供的 Favicon API</p>
               </div>
             </div>
           </div>
