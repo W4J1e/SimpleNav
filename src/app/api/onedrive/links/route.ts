@@ -87,33 +87,47 @@ export async function POST(request: NextRequest) {
       if (success) {
         return NextResponse.json({ success: true });
       } else {
+        console.error('OneDriveService.writeFile 返回 false');
         return NextResponse.json(
           { error: '保存链接失败' },
           { status: 500 }
         );
       }
     } catch (error: any) {
+      console.error('保存链接到OneDrive时发生错误:', error);
       // 如果是令牌过期错误，尝试刷新令牌
       if (error.message && error.message.includes('401')) {
-        const { accessToken: newAccessToken } = await refreshAccessToken(user.refreshToken);
-        
-        const oneDriveService = new OneDriveService(newAccessToken);
-        const success = await oneDriveService.writeFile(
-          'links.json', 
-          JSON.stringify(links, null, 2)
-        );
-        
-        if (success) {
-          return NextResponse.json({ success: true });
-        } else {
+        try {
+          const { accessToken: newAccessToken } = await refreshAccessToken(user.refreshToken);
+          
+          const oneDriveService = new OneDriveService(newAccessToken);
+          const success = await oneDriveService.writeFile(
+            'links.json', 
+            JSON.stringify(links, null, 2)
+          );
+          
+          if (success) {
+            return NextResponse.json({ success: true });
+          } else {
+            console.error('刷新令牌后，OneDriveService.writeFile 返回 false');
+            return NextResponse.json(
+              { error: '保存链接失败' },
+              { status: 500 }
+            );
+          }
+        } catch (refreshError) {
+          console.error('刷新令牌失败:', refreshError);
           return NextResponse.json(
-            { error: '保存链接失败' },
+            { error: '刷新令牌失败' },
             { status: 500 }
           );
         }
       }
       
-      throw error;
+      return NextResponse.json(
+        { error: `保存链接失败: ${error.message || '未知错误'}` },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('保存链接失败:', error);

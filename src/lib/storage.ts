@@ -273,20 +273,49 @@ export async function syncData(): Promise<boolean> {
         const cloudSettings = cloudSettingsResult.data as Settings;
         const cloudSettingsTimestamp = cloudSettingsResult.lastModified as number || 0;
         
-        // 比较时间戳
-        if (cloudSettingsTimestamp > localSettingsTimestamp) {
-          // 云端设置较新，同步到本地
+        // 检查本地设置是否有效
+        const isLocalSettingsValid = typeof localSettings === 'object' && localSettings !== null;
+        // 检查云端设置是否有效
+        const isCloudSettingsValid = typeof cloudSettings === 'object' && cloudSettings !== null;
+        
+        // 比较时间戳，只同步有效数据
+        if (isCloudSettingsValid && cloudSettingsTimestamp > localSettingsTimestamp) {
+          // 云端设置有效且较新，同步到本地
           saveSettings(cloudSettings);
           hasChanges = true;
-        } else if (localSettingsTimestamp > cloudSettingsTimestamp) {
-          // 本地设置较新，同步到云端
-          await oneDriveStorage.saveSettings(localSettings);
-          hasChanges = true;
+        } else if (isLocalSettingsValid && cloudSettingsTimestamp < localSettingsTimestamp) {
+          // 本地设置有效且较新，同步到云端
+          const settingsSynced = await oneDriveStorage.saveSettings(localSettings);
+          if (settingsSynced) {
+            hasChanges = true;
+          }
+        } else if (isLocalSettingsValid && !isCloudSettingsValid) {
+          // 本地设置有效但云端设置无效，将本地数据同步到云端，修复云端数据
+          const settingsSynced = await oneDriveStorage.saveSettings(localSettings);
+          if (settingsSynced) {
+            hasChanges = true;
+          }
         }
+        // 如果两者时间戳相同，或者本地和云端都无效，不做任何操作
       } else {
-        // 云端数据是旧格式，没有时间戳，直接同步到本地
-        saveSettings(cloudSettingsResult as Settings);
-        hasChanges = true;
+        // 云端数据是旧格式，没有时间戳
+        const cloudSettings = cloudSettingsResult as Settings;
+        // 检查云端设置是否有效
+        const isCloudSettingsValid = typeof cloudSettings === 'object' && cloudSettings !== null;
+        // 检查本地设置是否有效
+        const isLocalSettingsValid = typeof localSettings === 'object' && localSettings !== null;
+        
+        if (isCloudSettingsValid) {
+          // 云端设置有效，同步到本地
+          saveSettings(cloudSettings);
+          hasChanges = true;
+        } else if (isLocalSettingsValid) {
+          // 本地设置有效但云端设置无效，将本地数据同步到云端，修复云端数据
+          const settingsSynced = await oneDriveStorage.saveSettings(localSettings);
+          if (settingsSynced) {
+            hasChanges = true;
+          }
+        }
       }
     }
     
@@ -298,20 +327,49 @@ export async function syncData(): Promise<boolean> {
         const cloudLinks = cloudLinksResult.data as Link[];
         const cloudLinksTimestamp = cloudLinksResult.lastModified as number || 0;
         
-        // 比较时间戳
-        if (cloudLinksTimestamp > localLinksTimestamp) {
-          // 云端链接较新，同步到本地
+        // 检查本地链接是否有效
+        const isLocalLinksValid = Array.isArray(localLinks) && localLinks.length > 0;
+        // 检查云端链接是否有效且非空
+        const isCloudLinksValid = Array.isArray(cloudLinks) && cloudLinks.length > 0;
+        
+        // 比较时间戳，只同步有效数据
+        if (isCloudLinksValid && cloudLinksTimestamp > localLinksTimestamp) {
+          // 云端链接有效且较新，同步到本地
           saveLinks(cloudLinks);
           hasChanges = true;
-        } else if (localLinksTimestamp > cloudLinksTimestamp) {
-          // 本地链接较新，同步到云端
-          await oneDriveStorage.saveLinks(localLinks);
-          hasChanges = true;
+        } else if (isLocalLinksValid && cloudLinksTimestamp < localLinksTimestamp) {
+          // 本地链接有效且较新，同步到云端
+          const linksSynced = await oneDriveStorage.saveLinks(localLinks);
+          if (linksSynced) {
+            hasChanges = true;
+          }
+        } else if (isLocalLinksValid && !isCloudLinksValid) {
+          // 本地链接有效但云端链接无效，将本地数据同步到云端，修复云端数据
+          const linksSynced = await oneDriveStorage.saveLinks(localLinks);
+          if (linksSynced) {
+            hasChanges = true;
+          }
         }
+        // 如果两者时间戳相同，或者本地和云端都无效，不做任何操作
       } else if (Array.isArray(cloudLinksResult)) {
-        // 云端数据是旧格式，没有时间戳，直接同步到本地
-        saveLinks(cloudLinksResult);
-        hasChanges = true;
+        // 云端数据是旧格式，没有时间戳
+        const cloudLinks = cloudLinksResult as Link[];
+        // 检查云端链接是否有效且非空
+        const isCloudLinksValid = cloudLinks.length > 0;
+        // 检查本地链接是否有效
+        const isLocalLinksValid = Array.isArray(localLinks) && localLinks.length > 0;
+        
+        if (isCloudLinksValid) {
+          // 云端链接有效，同步到本地
+          saveLinks(cloudLinks);
+          hasChanges = true;
+        } else if (isLocalLinksValid) {
+          // 本地链接有效但云端链接无效，将本地数据同步到云端，修复云端数据
+          const linksSynced = await oneDriveStorage.saveLinks(localLinks);
+          if (linksSynced) {
+            hasChanges = true;
+          }
+        }
       }
     }
     
