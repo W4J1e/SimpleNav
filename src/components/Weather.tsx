@@ -193,11 +193,11 @@ export default function Weather() {
             </div>
           </div>
           
-          {/* 未来3天的天气预报 */}
+          {/* 未来2天的天气预报 */}
           <div className="border-t border-white/20 pt-3">
-            <div className="text-xs font-medium mb-2 opacity-80">未来3天预报</div>
+            <div className="text-xs font-medium mb-2 opacity-80">未来2天预报</div>
             <div className="space-y-2">
-              {weatherData.daily.slice(1).map((day, index) => (
+              {weatherData.daily.slice(1, 3).map((day, index) => (
                 <div key={index} className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="w-12 text-xs">{day.day}</div>
@@ -209,6 +209,13 @@ export default function Weather() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+          
+          {/* 数据来源链接 */}
+          <div className="mt-3 pt-3 border-t border-white/20">
+            <div className="text-xs opacity-70 text-center">
+              数据来源：<a href="https://www.seniverse.com/?from=a.hin.cool" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">心知天气</a>
             </div>
           </div>
         </div>

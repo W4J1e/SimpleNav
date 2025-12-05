@@ -68,17 +68,17 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
             <div className="space-y-2">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">鸣谢</p>
               <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <p>感谢 <a href="https://uapis.cn/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">uapis.cn</a> 提供的知乎热榜 API</p>
-                <p>感谢 <a href="https://www.cikeee.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">cikeee.com</a> 提供的电影日历 API</p>
-                <p>感谢 <a href="https://bing.img.run/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">bing.img.run</a> 提供的 Bing 图片 API</p>
-                <p>感谢 <a href="https://favicon.im/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">favicon.im</a> 提供的 Favicon API</p>
+                <p>感谢 <a href="https://uapis.cn/?from=a.hin.cool" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">uapis.cn</a> 提供的知乎热榜 API</p>
+                <p>感谢 <a href="https://www.cikeee.com/?from=a.hin.cool" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">cikeee.com</a> 提供的电影日历 API</p>
+                <p>感谢 <a href="https://bing.img.run/?from=a.hin.cool" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">bing.img.run</a> 提供的 Bing 图片 API</p>
+                <p>感谢 <a href="https://favicon.im/?from=a.hin.cool" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">favicon.im</a> 提供的 Favicon API</p>
               </div>
             </div>
           </div>
           
           <div className="border-t dark:border-gray-700 pt-4">
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              © 2025 <a href="https://github.com/W4J1e/Simple-navigation" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline dark:text-blue-400">SimpleNav</a>. 保留所有权利.
+              © 2025 <a href="https://github.com/W4J1e/Simplenav" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline dark:text-blue-400">SimpleNav</a>. 保留所有权利.
             </p>
           </div>
         </div>
