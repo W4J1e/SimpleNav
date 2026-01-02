@@ -7,9 +7,39 @@ import { useState, useEffect, useMemo } from 'react';
 import TodoDialog from './TodoDialog';
 import MovieCalendarDialog from './MovieCalendarDialog';
 
+// 电影数据接口
+interface MovieData {
+  gettime: number;
+  daily_word: string;
+  mov_title: string;
+  mov_text: string;
+  mov_id: string;
+  mov_link: string;
+  mov_rating: string;
+  mov_director: string;
+  mov_year: number;
+  mov_area: string;
+  mov_type: string[];
+  mov_pic: string;
+  mov_intro: string;
+}
+
 // 电影日历卡片组件
-const MovieCalendarCard = ({ movieLink, draggedLinkId, draggedOverLinkId, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave, setIsMovieCalendarDialogOpen }: {
+const MovieCalendarCard = ({ 
+  movieLink, 
+  movieData, 
+  isLoading, 
+  draggedLinkId, 
+  draggedOverLinkId, 
+  handleDragStart, 
+  handleDragOver, 
+  handleDragEnd, 
+  handleDragLeave, 
+  setIsMovieCalendarDialogOpen 
+}: {
   movieLink: LinkType;
+  movieData: MovieData | null;
+  isLoading: boolean;
   draggedLinkId: string | null;
   draggedOverLinkId: string | null;
   handleDragStart: (e: React.DragEvent, link: LinkType) => void;
@@ -18,23 +48,6 @@ const MovieCalendarCard = ({ movieLink, draggedLinkId, draggedOverLinkId, handle
   handleDragLeave: () => void;
   setIsMovieCalendarDialogOpen: (open: boolean) => void;
 }) => {
-  // 内部状态管理
-  const [movieData, setMovieData] = useState<{ 
-    gettime: number;
-    daily_word: string;
-    mov_title: string;
-    mov_text: string;
-    mov_id: string;
-    mov_link: string;
-    mov_rating: string;
-    mov_director: string;
-    mov_year: number;
-    mov_area: string;
-    mov_type: string[];
-    mov_pic: string;
-    mov_intro: string;
-  } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState<{ day: number; month: string; weekday: string }>({
     day: 0,
     month: '',
@@ -50,24 +63,6 @@ const MovieCalendarCard = ({ movieLink, draggedLinkId, draggedOverLinkId, handle
     const weekday = weekdays[date.getDay()];
     
     setCurrentDate({ day, month, weekday });
-  }, []);
-
-  // 获取电影数据
-  useEffect(() => {
-    const fetchMovieData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/movie-calendar');
-        const data = await response.json();
-        setMovieData(data);
-      } catch (error) {
-        console.error('获取电影数据失败:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMovieData();
   }, []);
 
   if (isLoading || !movieData) {
@@ -139,6 +134,7 @@ const MovieCalendarCard = ({ movieLink, draggedLinkId, draggedOverLinkId, handle
     </div>
   );
 };
+
 
 interface HotBoardItem {
   title: string;
@@ -407,8 +403,25 @@ export default function LinksGrid({
   };
 
   const [hotBoardData, setHotBoardData] = useState<HotBoardItem[]>([]);
-
   const [isLoadingHotBoard, setIsLoadingHotBoard] = useState(false);
+  const [movieData, setMovieData] = useState<MovieData | null>(null);
+  const [isLoadingMovie, setIsLoadingMovie] = useState(false);
+
+  const fetchMovieData = async () => {
+    setIsLoadingMovie(true);
+    try {
+      const response = await fetch('/api/movie-calendar');
+      if (response.ok) {
+        const data = await response.json();
+        setMovieData(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch movie data:', error);
+    } finally {
+      setIsLoadingMovie(false);
+    }
+  };
+
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
     x: number;
@@ -447,7 +460,9 @@ export default function LinksGrid({
 
   useEffect(() => {
     fetchHotBoardData();
+    fetchMovieData();
   }, []);
+
 
   const closeContextMenu = () => {
     setContextMenu(prev => ({ ...prev, visible: false }));
@@ -676,6 +691,8 @@ export default function LinksGrid({
               <MovieCalendarCard 
                 key={item.id}
                 movieLink={item}
+                movieData={movieData}
+                isLoading={isLoadingMovie}
                 draggedLinkId={draggedLinkId}
                 draggedOverLinkId={draggedOverLinkId}
                 handleDragStart={handleDragStart}
@@ -686,6 +703,7 @@ export default function LinksGrid({
               />
             );
           }
+
           
           // 渲染普通卡片或知乎热榜
           return (
