@@ -252,13 +252,21 @@ export default function HomePage() {
       let loadedLinks = getLinks();
       let loadedSettings = getSettings();
       
-      // 确保links是数组
-      if (!Array.isArray(loadedLinks)) {
+      // 确保links是数组并去重
+      if (Array.isArray(loadedLinks)) {
+        const seen = new Set();
+        loadedLinks = loadedLinks.filter(link => {
+          if (!link.id || seen.has(link.id)) return false;
+          seen.add(link.id);
+          return true;
+        });
+      } else {
         loadedLinks = [];
       }
+
       
       // 检查是否有热榜卡片，如果没有则添加
-      const hasHotBoard = loadedLinks.some(link => link.isHotBoard);
+      const hasHotBoard = loadedLinks.some(link => link.isHotBoard || link.id === 'zhihu-hot-board');
       if (!hasHotBoard) {
         const hotBoardLink: Link = {
           id: 'zhihu-hot-board',
@@ -273,7 +281,7 @@ export default function HomePage() {
       }
       
       // 检查是否有待办事项卡片，如果没有则添加
-      const hasTodoCard = loadedLinks.some(link => link.isTodo);
+      const hasTodoCard = loadedLinks.some(link => link.isTodo || link.id === 'todo-card');
       if (!hasTodoCard) {
         const todoLink: Link = {
           id: 'todo-card',
@@ -289,7 +297,7 @@ export default function HomePage() {
       }
       
       // 检查是否有电影日历卡片，如果没有则添加
-      const hasMovieCalendar = loadedLinks.some(link => link.isMovieCalendar);
+      const hasMovieCalendar = loadedLinks.some(link => link.isMovieCalendar || link.id === 'movie-calendar');
       if (!hasMovieCalendar) {
         const movieCalendarLink: Link = {
           id: 'movie-calendar',
@@ -302,6 +310,7 @@ export default function HomePage() {
         };
         loadedLinks = [movieCalendarLink, ...loadedLinks];
       }
+
       
       // 2. 立即设置本地数据到组件状态，确保页面快速加载
       setLinks(loadedLinks);
@@ -456,7 +465,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header 
         onToggleAddLink={toggleLinkForm}
         onToggleTheme={toggleTheme}
@@ -464,13 +473,14 @@ export default function HomePage() {
         darkMode={settings.darkMode}
       />
       
-      <main className="flex-grow p-6 md:p-12 flex flex-col items-center">
+      <main className="flex-grow p-4 md:p-12 flex flex-col items-center overflow-hidden">
         <Search 
           searchEngine={settings.searchEngine}
           onSearchEngineChange={handleSearchEngineChange}
         />
         
-        <div className="w-full max-w-7xl mt-8">
+        <div className="w-full max-w-7xl mt-4 md:mt-8 flex-grow overflow-hidden flex flex-col">
+
           {/* 链接网格 - 包含所有卡片，包括待办组件 */}
           <LinksGrid 
             links={links}
@@ -491,6 +501,7 @@ export default function HomePage() {
         onToggleAbout={toggleAbout}
         onToggleHelp={() => setIsHelpOpen(true)}
       />
+
       
       <LinkForm 
         isOpen={isLinkFormOpen}

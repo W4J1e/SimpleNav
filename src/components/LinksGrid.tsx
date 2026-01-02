@@ -2,7 +2,8 @@
 
 import { Link as LinkType, TodoItem } from '../types/index';
 import { getFaviconUrl, getBetterFaviconUrl } from '../lib/utils';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+
 import TodoDialog from './TodoDialog';
 import MovieCalendarDialog from './MovieCalendarDialog';
 
@@ -173,6 +174,206 @@ export default function LinksGrid({
   // 电影日历对话框状态管理
   const [isMovieCalendarDialogOpen, setIsMovieCalendarDialogOpen] = useState(false);
   
+  // 分页状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const [columns, setColumns] = useState(6);
+
+  const safeLinks = Array.isArray(links) ? links : [];
+
+  // 分页逻辑 - 移动端(columns <= 3)显示6行，PC端(columns > 3)显示5行
+  const rowsPerPage = columns <= 3 ? 6 : 5;
+  
+  // 使用 useMemo 避免每次渲染都重新计算分页，确保计算过程纯净
+  const pages = useMemo(() => {
+    // 基础数据处理：去重和过滤
+    let filtered = Array.isArray(links) ? [...links] : [];
+    
+    // 严格去重，防止 ID 重复导致的渲染错误
+    const seenIds = new Set();
+    filtered = filtered.filter(link => {
+      if (!link.id || seenIds.has(link.id)) return false;
+      seenIds.add(link.id);
+      return true;
+    });
+
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(link => link.category === selectedCategory);
+    }
+    
+    // 如果是瀑布流，不分页
+    if (layout === 'masonry') {
+      return [[...filtered, { id: 'add-card', isAddCard: true } as any]];
+    }
+    
+    const allCardsToPlace = [...filtered, { id: 'add-card', isAddCard: true } as any];
+    const pagesResult: any[][] = [];
+    const gridOccupancy: boolean[][] = [];
+    // 初始化网格占用，1000行足够容纳绝大多数用户的数据
+    for (let i = 0; i < 1000; i++) {
+      gridOccupancy[i] = new Array(columns).fill(false);
+    }
+
+    allCardsToPlace.forEach((item) => {
+      let w = 1;
+      let h = 1;
+      // 定义不同类型卡片的占用尺寸
+      if (item.isMovieCalendar) { w = 2; h = 2; }
+      else if (item.isTodo || item.isHotBoard) { w = 1; h = 2; }
+      
+      // 适配当前列数
+      if (w > columns) w = columns;
+
+      let placed = false;
+      for (let r = 0; !placed && r < 900; r++) {
+        for (let c = 0; c <= columns - w; c++) {
+          // 检查该位置是否已被占用
+          let fits = true;
+          for (let dr = 0; dr < h; dr++) {
+            for (let dc = 0; dc < w; dc++) {
+              if (gridOccupancy[r + dr][c + dc]) {
+                fits = false;
+                break;
+              }
+            }
+            if (!fits) break;
+          }
+
+          if (fits) {
+            // 计算起止页码，确保卡片不跨页
+            const startPage = Math.floor(r / rowsPerPage);
+            const endPage = Math.floor((r + h - 1) / rowsPerPage);
+            
+            if (startPage !== endPage) {
+              // 跨页处理：将搜索位置移动到下一页开头
+              c = columns; 
+              r = (startPage + 1) * rowsPerPage - 1; 
+              continue;
+            }
+
+            // 标记网格占用
+            for (let dr = 0; dr < h; dr++) {
+              for (let dc = 0; dc < w; dc++) {
+                gridOccupancy[r + dr][c + dc] = true;
+              }
+            }
+            
+            // 将卡片加入对应页
+            if (!pagesResult[startPage]) pagesResult[startPage] = [];
+            pagesResult[startPage].push(item);
+            placed = true;
+            break;
+          }
+        }
+      }
+    });
+    return pagesResult;
+  }, [links, selectedCategory, layout, columns, rowsPerPage]);
+
+
+  const totalPages = pages.length;
+
+  // 监听窗口大小以确定当前列数
+  useEffect(() => {
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width >= 1024) setColumns(6);
+      else if (width >= 768) setColumns(4);
+      else if (width >= 640) setColumns(3);
+      else setColumns(2);
+    };
+    
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, []);
+
+  // 当分类改变时，重置页码
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
+
+  // 确保当前页码在有效范围内
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+
+  const categories = useMemo(() => {
+    const linkCategories = new Set(safeLinks.map(link => link.category));
+
+    if (linkCategories.has('常用')) {
+      linkCategories.delete('常用');
+    }
+    return ['all', '常用', ...Array.from(linkCategories)];
+  }, [safeLinks]);
+
+
+  // 处理滚轮和触摸翻页
+  useEffect(() => {
+    let lastScrollTime = 0;
+    const SCROLL_DEBOUNCE = 600; // 600ms 间隔，防止滑得太快
+
+    const handleWheel = (e: WheelEvent) => {
+      // 检查是否有垂直滚动位移
+      if (Math.abs(e.deltaY) < 30) return;
+
+      // 阻止默认滚动行为（虽然已经设置了 overflow-hidden，但这样更稳妥）
+      if (e.cancelable) e.preventDefault();
+
+      const now = Date.now();
+      if (now - lastScrollTime < SCROLL_DEBOUNCE) return;
+
+
+      if (e.deltaY > 0) {
+        if (currentPage < totalPages) {
+          setCurrentPage(prev => prev + 1);
+          lastScrollTime = now;
+        }
+      } else {
+        if (currentPage > 1) {
+          setCurrentPage(prev => prev - 1);
+          lastScrollTime = now;
+        }
+      }
+    };
+
+    // 触摸翻页
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaY = touchStartY - touchEndY;
+      const now = Date.now();
+      
+      if (Math.abs(deltaY) > 50 && now - lastScrollTime > SCROLL_DEBOUNCE) {
+        if (deltaY > 0 && currentPage < totalPages) {
+          setCurrentPage(prev => prev + 1);
+          lastScrollTime = now;
+        } else if (deltaY < 0 && currentPage > 1) {
+          setCurrentPage(prev => prev - 1);
+          lastScrollTime = now;
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchend', handleTouchEnd);
+
+    
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [currentPage, totalPages]);
+
+
+
 
 
   // 处理待办对话框打开
@@ -182,11 +383,12 @@ export default function LinksGrid({
   };
   
   // 处理待办事项更新
-  const handleTodosChange = (newTodos: TodoItem[]) => {
-    if (!activeTodoLink) return;
+  const handleTodosChange = (newTodos: TodoItem[], todoLinkId?: string) => {
+    const targetId = todoLinkId || activeTodoLink?.id;
+    if (!targetId) return;
     
     // 找到待办事项链接在数组中的位置
-    const todoLinkIndex = links.findIndex(link => link.id === activeTodoLink.id);
+    const todoLinkIndex = links.findIndex(link => link.id === targetId);
     if (todoLinkIndex === -1) return;
     
     // 更新链接数组中的待办事项数据
@@ -199,8 +401,9 @@ export default function LinksGrid({
     // 调用重新排序回调来更新整个链接数组
     onLinksReorder(newLinks);
   };
-  const safeLinks = Array.isArray(links) ? links : [];
+
   const [hotBoardData, setHotBoardData] = useState<HotBoardItem[]>([]);
+
   const [isLoadingHotBoard, setIsLoadingHotBoard] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
@@ -317,29 +520,64 @@ export default function LinksGrid({
     setDraggedOverLinkId(null);
   };
 
-  let filteredLinks = safeLinks;
-  if (selectedCategory !== 'all') {
-    filteredLinks = safeLinks.filter(link => link.category === selectedCategory);
-  }
-
-  const linkCategories = new Set(safeLinks.map(link => link.category));
-  if (linkCategories.has('常用')) {
-    linkCategories.delete('常用');
-  }
-  const categories = ['all', '常用', ...linkCategories];
 
   const getGridClasses = () => {
     if (layout === 'grid' || layout === 'list') {
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4';
+      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-4';
     } else if (layout === 'masonry') {
+
       return 'masonry-grid';
     }
     return '';
   };
 
+  const currentItems = pages[currentPage - 1] || [];
+
+
+
+
+
+  // 获取显示的页码圆点
+  const getPaginationDots = () => {
+    if (totalPages <= 1) return null;
+    
+    let displayPages: number[] = [];
+    if (totalPages <= 3) {
+      displayPages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    } else {
+      if (currentPage < 3) {
+        displayPages = [1, 2, 3];
+      } else if (currentPage >= totalPages) {
+        displayPages = [totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        displayPages = [currentPage - 1, currentPage, currentPage + 1];
+      }
+    }
+
+    return (
+      <div className="flex justify-center items-center gap-3 mt-auto py-4 flex-shrink-0">
+        {displayPages.map((pageNum) => (
+
+          <button
+            key={pageNum}
+            onClick={() => setCurrentPage(pageNum)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              currentPage === pageNum 
+                ? 'bg-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.8)]' 
+                : 'bg-white/30 hover:bg-white/50'
+            }`}
+            title={`第 ${pageNum} 页`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+
   return (
-    <div className="w-full max-w-7xl">
-      <div id="category-tabs" className="flex overflow-x-auto pb-4 mb-6 gap-2 scrollbar-hide">
+    <div className="w-full max-w-7xl flex flex-col flex-grow overflow-hidden">
+      <div id="category-tabs" className="flex overflow-x-auto pb-4 mb-6 gap-2 scrollbar-hide flex-shrink-0">
+
         {categories.map(category => (
           <button 
             key={category}
@@ -355,151 +593,137 @@ export default function LinksGrid({
       </div>
 
       {/* 链接网格 - 确保有足够的空间显示所有卡片 */}
-      <div id="links-grid" className={`${getGridClasses()} min-h-[200px]`}>
-        {/* 创建一个包含所有卡片的数组，包括待办事项卡片和过滤后的链接 */}
-        {(() => {
-          // 渲染待办事项卡片
-          const renderTodoCard = (todoLink: LinkType) => {
-            return (
-              <div key={todoLink.id} className="row-span-2">
-              <div 
-                className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full ${draggedLinkId === todoLink.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === todoLink.id ? 'ring-2 ring-blue-400' : ''}`}
-                draggable="true"
-                onDragStart={(e) => handleDragStart(e, todoLink)}
-                onDragOver={(e) => handleDragOver(e, todoLink)}
-                onDragEnd={handleDragEnd}
-                onDragLeave={handleDragLeave}
-                onClick={() => handleTodoDialogOpen(todoLink)}
-              >
-                {/* 标题栏 */}
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded-full text-xs">
-                    {(todoLink.todoItems || []).filter(item => !item.completed).length}
-                  </span>
-                  <h3 className="font-medium truncate text-base text-white dark:text-white">
-                    待办事项
-                  </h3>
-                </div>
+      <div id="links-grid" className={`${getGridClasses()} min-h-[200px] flex-grow content-start overflow-hidden`}>
 
-                {/* 待办列表 */}
-                <div className="space-y-2 flex-grow overflow-y-auto">
-                  {(todoLink.todoItems || []).length > 0 ? (
-                    (todoLink.todoItems || [])
-                      .sort((a, b) => {
-                        // 未完成的排在前面，已完成的排在后面
-                        if (a.completed !== b.completed) {
-                          return a.completed ? 1 : -1;
-                        }
-                        // 对于相同完成状态的项，保持原有顺序
-                        return 0;
-                      })
-                      .slice(0, 3)
-                      .map((item) => (
-                      <div 
-                        key={item.id} 
-                        className={`flex items-center p-2 rounded-md ${item.completed ? 'opacity-70' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation(); // 阻止事件冒泡，避免触发卡片点击
-                          // 更新待办事项完成状态
-                          const updatedItems = (todoLink.todoItems || []).map(todo => 
-                            todo.id === item.id ? { ...todo, completed: !todo.completed } : todo
-                          );
-                          handleTodosChange(updatedItems);
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={item.completed}
-                          onChange={(e) => {
-                            // 更新待办事项完成状态
-                            const updatedItems = (todoLink.todoItems || []).map(todo => 
-                              todo.id === item.id ? { ...todo, completed: e.target.checked } : todo
-                            );
-                            handleTodosChange(updatedItems);
-                          }}
-                          className="mr-2 h-4 w-4 text-green-500 rounded focus:ring-green-400 border-gray-300 dark:border-gray-600"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <span 
-                          className={`text-sm truncate flex-grow ${item.completed ? 'line-through text-gray-300 dark:text-gray-400' : 'text-white dark:text-white'}`}
-                        >
-                          {item.content}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center text-gray-500 dark:text-gray-400 text-sm py-4">
-                      暂无待办事项
-                    </div>
-                  )}
+        {/* 渲染当前页的所有卡片 */}
+        {currentItems.map((item: any) => {
+          if (item.isAddCard) {
+            return (
+              <div key="add-card" className={layout === 'masonry' ? 'masonry-item' : ''}>
+                <div 
+                  className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card cursor-pointer flex items-center justify-center h-full min-h-[100px] dark:bg-gray-800/80 dark:hover:bg-gray-700/80"
+                  onClick={onAddLink}
+                >
+                  <i className="fas fa-plus-circle text-3xl"></i>
                 </div>
-              </div>
               </div>
             );
-          };
+          }
           
-          // 渲染电影日历卡片
-          // 渲染普通链接卡片
-          const renderLinkCard = (link: LinkType) => (
+          if (item.isTodo) {
+            // 渲染待办事项卡片
+            return (
+              <div key={item.id} className="row-span-2">
+                <div 
+                  className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
+                  draggable="true"
+                  onDragStart={(e) => handleDragStart(e, item)}
+                  onDragOver={(e) => handleDragOver(e, item)}
+                  onDragEnd={handleDragEnd}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => handleTodoDialogOpen(item)}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded-full">
+                      {(item.todoItems || []).filter((t: any) => !t.completed).length}
+                    </span>
+                    <h3 className="font-medium truncate text-base text-white">待办事项</h3>
+                  </div>
+                  <div className="space-y-2 flex-grow overflow-y-auto">
+                    {(item.todoItems || []).length > 0 ? (
+                      [...(item.todoItems || [])]
+                        .sort((a: any, b: any) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1))
+                        .slice(0, 3)
+                        .map((todo: any) => (
+                          <div 
+                            key={todo.id} 
+                            className={`flex items-center p-2 rounded-md ${todo.completed ? 'opacity-70' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const updatedItems = item.todoItems.map((t: any) => 
+                                t.id === todo.id ? { ...t, completed: !t.completed } : t
+                              );
+                              handleTodosChange(updatedItems, item.id);
+
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={todo.completed}
+                              readOnly
+                              className="mr-2 h-4 w-4 text-green-500 rounded focus:ring-green-400 border-gray-300"
+                            />
+                            <span className={`text-sm truncate flex-grow ${todo.completed ? 'line-through text-gray-300' : 'text-white'}`}>
+                              {todo.content}
+                            </span>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="text-center text-gray-500 text-sm py-4">暂无待办事项</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          
+          if (item.isMovieCalendar) {
+            return (
+              <MovieCalendarCard 
+                key={item.id}
+                movieLink={item}
+                draggedLinkId={draggedLinkId}
+                draggedOverLinkId={draggedOverLinkId}
+                handleDragStart={handleDragStart}
+                handleDragOver={handleDragOver}
+                handleDragEnd={handleDragEnd}
+                handleDragLeave={handleDragLeave}
+                setIsMovieCalendarDialogOpen={setIsMovieCalendarDialogOpen}
+              />
+            );
+          }
+          
+          // 渲染普通卡片或知乎热榜
+          return (
             <div 
-              key={link.id} 
-              className={`${layout === 'masonry' ? 'masonry-item' : ''} ${link.isHotBoard ? 'row-span-2' : ''}`}
+              key={item.id} 
+              className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2' : ''}`}
             >
               <div 
-                className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === link.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === link.id ? 'ring-2 ring-blue-400' : ''} ${link.isHotBoard ? 'h-full' : ''}`}
-                onContextMenu={(e) => handleContextMenu(e, link)}
+                className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} ${item.isHotBoard ? 'h-full' : ''}`}
+                onContextMenu={(e) => handleContextMenu(e, item)}
                 draggable="true"
-                onDragStart={(e) => handleDragStart(e, link)}
-                onDragOver={(e) => handleDragOver(e, link)}
+                onDragStart={(e) => handleDragStart(e, item)}
+                onDragOver={(e) => handleDragOver(e, item)}
                 onDragEnd={handleDragEnd}
                 onDragLeave={handleDragLeave}
                 onClick={(e) => {
-                  if (link.isHotBoard && onHotBoardClick) {
+                  if (item.isHotBoard && onHotBoardClick) {
                     e.preventDefault();
                     onHotBoardClick();
                   }
                 }}
               >
-                {link.isHotBoard ? (
+                {item.isHotBoard ? (
                   <div className="flex flex-col max-h-[160px]">
                     <div className="flex items-center justify-between mb-3">
-                      <div 
-                        className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (onHotBoardClick) {
-                            onHotBoardClick();
-                          }
-                        }}
-                      >
+                      <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
                         <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
                           <i className="fas fa-fire text-xl text-orange-500"></i>
                         </div>
                         <span className="font-medium truncate text-base">知乎热榜</span>
                       </div>
                     </div>
-                    
                     <div className="space-y-2 mt-2 flex-grow">
                       {isLoadingHotBoard ? (
-                        <div className="text-center py-2">
-                          <i className="fas fa-spinner fa-spin text-sm text-gray-400"></i>
-                        </div>
+                        <div className="text-center py-2"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
                       ) : hotBoardData.length === 0 ? (
-                        <div className="text-sm text-gray-300 text-center py-2">
-                          暂无数据
-                        </div>
+                        <div className="text-sm text-gray-300 text-center py-2">暂无数据</div>
                       ) : (
-                        hotBoardData.slice(0, 5).map((item, index) => (
+                        hotBoardData.slice(0, 5).map((h, index) => (
                           <div key={index} className="flex items-start gap-2">
                             <span className="text-xs font-medium text-gray-400 w-4">{index + 1}</span>
-                            <a 
-                              href={item.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-xs text-gray-200 hover:text-white truncate flex-grow"
-                            >
-                              {item.title}
-                            </a>
+                            <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow">{h.title}</a>
                           </div>
                         ))
                       )}
@@ -509,71 +733,33 @@ export default function LinksGrid({
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-4 w-full">
                       <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
-                        {link.useFavicon ? (
+                        {item.useFavicon ? (
                           <div className="relative w-10 h-10 rounded">
-                            {/* 首先尝试直接获取网站的favicon.ico */}
                             <img 
-                              src={getFaviconUrl(link.url)} 
-                              alt={`${link.name}图标`} 
+                              src={getFaviconUrl(item.url)} 
+                              alt={`${item.name}图标`} 
                               className="w-full h-full rounded" 
-                              onError={(e) => {
-                                // 直接获取失败，切换到favicon.im API（带?larger=true参数）
-                                const imgElement = e.currentTarget as HTMLImageElement;
-                                imgElement.src = getBetterFaviconUrl(link.url) || '';
-                              }}
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
                             />
                           </div>
                         ) : (
-                          <i className={`${link.icon || 'fas fa-link'} text-3xl`}></i>
+                          <i className={`${item.icon || 'fas fa-link'} text-3xl`}></i>
                         )}
                       </div>
-                      <span className="font-medium truncate text-base">{link.name}</span>
+                      <span className="font-medium truncate text-base">{item.name}</span>
                     </div>
                   </div>
                 )}
-                <a href={link.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>
+                {!item.isHotBoard && <a href={item.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>}
               </div>
             </div>
           );
-          
-              {/* 渲染所有卡片 */}
-              return (
-                <>
-                  {/* 渲染所有卡片，包括待办事项卡片和电影日历卡片，按照它们在数组中的实际顺序 */}
-                  {filteredLinks.map(link => {
-                    if (link.isTodo) {
-                      return renderTodoCard(link);
-                    } else if (link.isMovieCalendar) {
-                      return (
-                        <MovieCalendarCard 
-                          key={link.id}
-                          movieLink={link}
-                          draggedLinkId={draggedLinkId}
-                          draggedOverLinkId={draggedOverLinkId}
-                          handleDragStart={handleDragStart}
-                          handleDragOver={handleDragOver}
-                          handleDragEnd={handleDragEnd}
-                          handleDragLeave={handleDragLeave}
-                          setIsMovieCalendarDialogOpen={setIsMovieCalendarDialogOpen}
-                        />
-                      );
-                    } else {
-                      return renderLinkCard(link);
-                    }
-                  })}
-                </>
-              );
-            })()}
-        
-        <div className={layout === 'masonry' ? 'masonry-item' : ''}>
-          <div 
-            className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card cursor-pointer flex items-center justify-center h-full dark:bg-gray-800/80 dark:hover:bg-gray-700/80"
-            onClick={onAddLink}
-          >
-            <i className="fas fa-plus-circle text-3xl"></i>
-          </div>
-        </div>
+        })}
       </div>
+      
+      {/* 分页圆点 */}
+      {getPaginationDots()}
+
       
       {contextMenu.visible && contextMenu.link && (
         <div 
