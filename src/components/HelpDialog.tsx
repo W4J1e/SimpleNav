@@ -47,11 +47,17 @@ export default function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
               <div className="text-gray-800 dark:text-white">
                 <p className="text-sm">4. 点击右键菜单可以编辑或删除链接</p>
               </div>
-            </div>            
+            </div>
+
+            <div className="flex">
+              <div className="text-gray-800 dark:text-white">
+                <p className="text-sm">5. 移动端左右滑动切换页面</p>
+              </div>
+            </div>                           
             
             <div className="flex">
               <div>
-                <p className="text-sm">5. 更多开发和使用可以访问 <a href="https://hin.cool/posts/simplenav.html" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">我的博客</a></p>
+                <p className="text-sm">6. 更多开发和使用可以访问 <a href="https://hin.cool/posts/simplenav.html" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">我的博客</a></p>
               </div>
             </div>
           </div>

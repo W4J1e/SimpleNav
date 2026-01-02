@@ -180,8 +180,9 @@ export default function LinksGrid({
 
   const safeLinks = Array.isArray(links) ? links : [];
 
-  // 分页逻辑 - 移动端(columns <= 3)显示6行，PC端(columns > 3)显示5行
-  const rowsPerPage = columns <= 3 ? 6 : 5;
+  // 分页逻辑 - 统一改回每页5行，确保在移动端浏览器（带地址栏/状态栏）中不被遮挡
+  const rowsPerPage = 5;
+
   
   // 使用 useMemo 避免每次渲染都重新计算分页，确保计算过程纯净
   const pages = useMemo(() => {
@@ -339,26 +340,29 @@ export default function LinksGrid({
       }
     };
 
-    // 触摸翻页
-    let touchStartY = 0;
+    // 触摸翻页 - 改为左右滑动
+    let touchStartX = 0;
     const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
     };
     const handleTouchEnd = (e: TouchEvent) => {
-      const touchEndY = e.changedTouches[0].clientY;
-      const deltaY = touchStartY - touchEndY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const deltaX = touchStartX - touchEndX; // 正值表示向左滑（下一页），负值表示向右滑（上一页）
       const now = Date.now();
       
-      if (Math.abs(deltaY) > 50 && now - lastScrollTime > SCROLL_DEBOUNCE) {
-        if (deltaY > 0 && currentPage < totalPages) {
+      if (Math.abs(deltaX) > 50 && now - lastScrollTime < SCROLL_DEBOUNCE) return;
+      
+      if (Math.abs(deltaX) > 50) {
+        if (deltaX > 0 && currentPage < totalPages) {
           setCurrentPage(prev => prev + 1);
           lastScrollTime = now;
-        } else if (deltaY < 0 && currentPage > 1) {
+        } else if (deltaX < 0 && currentPage > 1) {
           setCurrentPage(prev => prev - 1);
           lastScrollTime = now;
         }
       }
     };
+
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('touchstart', handleTouchStart);
