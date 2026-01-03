@@ -110,6 +110,11 @@ interface HotBoardItem {
 interface LinksGridProps {
   links: LinkType[];
   layout: 'grid' | 'list' | 'masonry';
+  enabledComponents?: {
+    movieCalendar: boolean;
+    todoList: boolean;
+    zhihuHotBoard: boolean;
+  };
   selectedCategory: string;
   onEditLink: (link: LinkType) => void;
   onDeleteLink: (link: LinkType) => void;
@@ -121,6 +126,7 @@ interface LinksGridProps {
 export default function LinksGrid({
   links,
   layout,
+  enabledComponents,
   selectedCategory,
   onEditLink,
   onDeleteLink,
@@ -153,6 +159,16 @@ export default function LinksGrid({
   const pages = useMemo(() => {
     // 基础数据处理：去重和过滤
     let filtered = [...safeLinks];
+    
+    // 根据组件管理设置进行过滤
+    if (enabledComponents) {
+      filtered = filtered.filter(link => {
+        if (link.isMovieCalendar && enabledComponents.movieCalendar === false) return false;
+        if (link.isTodo && enabledComponents.todoList === false) return false;
+        if (link.isHotBoard && enabledComponents.zhihuHotBoard === false) return false;
+        return true;
+      });
+    }
     
     // 严格去重
     const seenIds = new Set();
@@ -233,7 +249,7 @@ export default function LinksGrid({
       }
     });
     return pagesResult;
-  }, [links, selectedCategory, layout, columns, rowsPerPage]);
+  }, [links, selectedCategory, layout, columns, rowsPerPage, enabledComponents]);
 
 
   const totalPages = pages.length;
@@ -267,13 +283,22 @@ export default function LinksGrid({
 
 
   const categories = useMemo(() => {
-    const linkCategories = new Set(safeLinks.map(link => link.category));
+    let filteredLinks = [...safeLinks];
+    if (enabledComponents) {
+      filteredLinks = filteredLinks.filter(link => {
+        if (link.isMovieCalendar && enabledComponents.movieCalendar === false) return false;
+        if (link.isTodo && enabledComponents.todoList === false) return false;
+        if (link.isHotBoard && enabledComponents.zhihuHotBoard === false) return false;
+        return true;
+      });
+    }
+    const linkCategories = new Set(filteredLinks.map(link => link.category));
 
     if (linkCategories.has('常用')) {
       linkCategories.delete('常用');
     }
     return ['all', '常用', ...Array.from(linkCategories)];
-  }, [safeLinks]);
+  }, [safeLinks, enabledComponents]);
 
 
   const handlePageChange = (newPage: number) => {

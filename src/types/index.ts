@@ -22,6 +22,11 @@ export interface Settings {
   showClock: boolean;
   darkMode: boolean;
   autoRefresh: boolean;
+  enabledComponents: {
+    movieCalendar: boolean;
+    todoList: boolean;
+    zhihuHotBoard: boolean;
+  };
 }
 
 // 带时间戳的数据结构

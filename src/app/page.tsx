@@ -485,6 +485,7 @@ export default function HomePage() {
           <LinksGrid 
             links={links}
             layout={settings.layout}
+            enabledComponents={settings.enabledComponents}
             selectedCategory={selectedCategory}
             onEditLink={handleEditLink}
             onDeleteLink={handleDeleteLink}

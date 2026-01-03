@@ -11,7 +11,12 @@ export const defaultSettings: Settings = {
   showClock: true,
   layout: 'grid',
   searchEngine: 'bing',
-  autoRefresh: true
+  autoRefresh: true,
+  enabledComponents: {
+    movieCalendar: true,
+    todoList: true,
+    zhihuHotBoard: true
+  }
 };
 
 // 默认链接
