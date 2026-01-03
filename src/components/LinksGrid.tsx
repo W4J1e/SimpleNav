@@ -313,8 +313,32 @@ export default function LinksGrid({
     const SCROLL_DEBOUNCE = 600; // 600ms 间隔，防止滑得太快
 
     const handleWheel = (e: WheelEvent) => {
+      // 检查滚轮事件是否发生在可滚动元素内部
+      // 如果目标元素或其父元素是可滚动的，则不触发翻页
+      const target = e.target as HTMLElement;
+      const isScrollable = (el: HTMLElement) => {
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        const overflowY = style.getPropertyValue('overflow-y');
+        if (overflowY === 'auto' || overflowY === 'scroll') {
+          return el.scrollHeight > el.clientHeight;
+        }
+        return false;
+      };
+
+      let currentEl = target;
+      while (currentEl && currentEl !== document.body) {
+        if (isScrollable(currentEl)) {
+          // 如果内部元素已经滚动到底部或顶部，且继续往那个方向滚，才允许触发外层翻页（可选，这里先完全禁用以保证体验）
+          // 这里我们选择只要在可滚动区域内就禁用外层翻页
+          return;
+        }
+        currentEl = currentEl.parentElement as HTMLElement;
+      }
+
       // 检查是否有垂直滚动位移
       if (Math.abs(e.deltaY) < 30) return;
+
 
       // 阻止默认滚动行为（虽然已经设置了 overflow-hidden，但这样更稳妥）
       if (e.cancelable) e.preventDefault();
