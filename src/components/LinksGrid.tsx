@@ -36,59 +36,26 @@ const MovieCalendarCard = ({
   handleDragEnd, 
   handleDragLeave, 
   setIsMovieCalendarDialogOpen 
-}: {
-  movieLink: LinkType;
-  movieData: MovieData | null;
-  isLoading: boolean;
-  draggedLinkId: string | null;
-  draggedOverLinkId: string | null;
-  handleDragStart: (e: React.DragEvent, link: LinkType) => void;
-  handleDragOver: (e: React.DragEvent, link: LinkType) => void;
-  handleDragEnd: () => void;
-  handleDragLeave: () => void;
-  setIsMovieCalendarDialogOpen: (open: boolean) => void;
-}) => {
-  const [currentDate, setCurrentDate] = useState<{ day: number; month: string; weekday: string }>({
-    day: 0,
-    month: '',
-    weekday: ''
-  });
+}: any) => {
+  const [currentDate, setCurrentDate] = useState({ day: 0, month: '', weekday: '' });
 
-  // 获取当前日期信息
   useEffect(() => {
     const date = new Date();
-    const day = date.getDate();
-    const month = `${date.getMonth() + 1}月`;
     const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    const weekday = weekdays[date.getDay()];
-    
-    setCurrentDate({ day, month, weekday });
+    setCurrentDate({ 
+      day: date.getDate(), 
+      month: `${date.getMonth() + 1}月`, 
+      weekday: weekdays[date.getDay()] 
+    });
   }, []);
 
-  if (isLoading || !movieData) {
-    return (
-      <div key={movieLink.id} className="col-span-2 row-span-2">
-        <div 
-          className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full overflow-hidden ${draggedLinkId === movieLink.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === movieLink.id ? 'ring-2 ring-blue-400' : ''}`}
-          draggable="true"
-          onDragStart={(e) => handleDragStart(e, movieLink)}
-          onDragOver={(e) => handleDragOver(e, movieLink)}
-          onDragEnd={handleDragEnd}
-          onDragLeave={handleDragLeave}
-          onClick={() => setIsMovieCalendarDialogOpen(true)}
-        >
-          <div className="flex items-center justify-center h-full">
-            <i className="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isDragging = draggedLinkId === movieLink.id;
+  const isOver = draggedOverLinkId === movieLink.id;
 
   return (
     <div key={movieLink.id} className="col-span-2 row-span-2">
       <div 
-        className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full overflow-hidden ${draggedLinkId === movieLink.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === movieLink.id ? 'ring-2 ring-blue-400' : ''}`}
+        className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full overflow-hidden ${isDragging ? 'opacity-50 transform scale-105' : ''} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
         draggable="true"
         onDragStart={(e) => handleDragStart(e, movieLink)}
         onDragOver={(e) => handleDragOver(e, movieLink)}
@@ -96,40 +63,38 @@ const MovieCalendarCard = ({
         onDragLeave={handleDragLeave}
         onClick={() => setIsMovieCalendarDialogOpen(true)}
       >
-        {/* 电影海报 */}
-        <div className="absolute top-0 left-0 w-32 h-full bg-cover bg-center" style={{ backgroundImage: `url(${movieData.mov_pic})` }}>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/50"></div>
-        </div>
-        
-        {/* 日期信息 */}
-        <div className="absolute top-4 right-4 backdrop-blur-sm rounded-lg p-1 text-center">
-          <div className="text-base font-bold">{currentDate.day}</div>
-          <div className="text-[10px] opacity-80">{currentDate.month}/{currentDate.weekday}</div>
-        </div>
-        
-        {/* 电影信息 */}
-        <div className="ml-36 h-full flex flex-col justify-between">
-          {/* 电影标题和评分 */}
-          <div className="overflow-hidden">
-            <h3 className="text-lg font-bold mb-1 truncate">{movieData.mov_title}</h3>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-green-400 text-sm">豆 {movieData.mov_rating}</span>
-              <span className="text-xs opacity-80 truncate">{movieData.mov_year} {movieData.mov_area}</span>
-            </div>
-            
-            {/* 电影类型 */}
-            <div className="flex flex-wrap gap-1 mb-2">
-              {movieData.mov_type.slice(0, 3).map((type, index) => (
-                <span key={index} className="text-xs bg-white/20 rounded-full px-2 py-0.5 truncate max-w-[60px]">{type}</span>
-              ))}
-            </div>
+        {isLoading || !movieData ? (
+          <div className="flex items-center justify-center h-full">
+            <i className="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
           </div>
-          
-          {/* 电影台词 */}
-          <div className="mt-1 text-sm italic opacity-70 line-clamp-3 overflow-hidden">
-            "{movieData.mov_text}"
-          </div>
-        </div>
+        ) : (
+          <>
+            <div className="absolute top-0 left-0 w-32 h-full bg-cover bg-center" style={{ backgroundImage: `url(${movieData.mov_pic})` }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/50"></div>
+            </div>
+            <div className="absolute top-4 right-4 backdrop-blur-sm rounded-lg p-1 text-center">
+              <div className="text-base font-bold">{currentDate.day}</div>
+              <div className="text-[10px] opacity-80">{currentDate.month}/{currentDate.weekday}</div>
+            </div>
+            <div className="ml-36 h-full flex flex-col justify-between">
+              <div className="overflow-hidden">
+                <h3 className="text-lg font-bold mb-1 truncate">{movieData.mov_title}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-green-400 text-sm">豆 {movieData.mov_rating}</span>
+                  <span className="text-xs opacity-80 truncate">{movieData.mov_year} {movieData.mov_area}</span>
+                </div>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {movieData.mov_type.slice(0, 3).map((type: string, index: number) => (
+                    <span key={index} className="text-xs bg-white/20 rounded-full px-2 py-0.5 truncate max-w-[60px]">{type}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-1 text-sm italic opacity-70 line-clamp-3 overflow-hidden">
+                "{movieData.mov_text}"
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -172,7 +137,11 @@ export default function LinksGrid({
   
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
+  const [prevPage, setPrevPage] = useState(1);
   const [columns, setColumns] = useState(6);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState<'next' | 'prev'>('next');
+
 
   const safeLinks = Array.isArray(links) ? links : [];
 
@@ -183,9 +152,9 @@ export default function LinksGrid({
   // 使用 useMemo 避免每次渲染都重新计算分页，确保计算过程纯净
   const pages = useMemo(() => {
     // 基础数据处理：去重和过滤
-    let filtered = Array.isArray(links) ? [...links] : [];
+    let filtered = [...safeLinks];
     
-    // 严格去重，防止 ID 重复导致的渲染错误
+    // 严格去重
     const seenIds = new Set();
     filtered = filtered.filter(link => {
       if (!link.id || seenIds.has(link.id)) return false;
@@ -307,14 +276,26 @@ export default function LinksGrid({
   }, [safeLinks]);
 
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage === currentPage || isAnimating) return;
+    setPrevPage(currentPage);
+    setDirection(newPage > currentPage ? 'next' : 'prev');
+    setIsAnimating(true);
+    setCurrentPage(newPage);
+    // 动画时间与 CSS transition 保持一致 (500ms)
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
   // 处理滚轮和触摸翻页
   useEffect(() => {
     let lastScrollTime = 0;
     const SCROLL_DEBOUNCE = 600; // 600ms 间隔，防止滑得太快
 
     const handleWheel = (e: WheelEvent) => {
+      // 如果正在动画中，直接返回
+      if (isAnimating) return;
+
       // 检查滚轮事件是否发生在可滚动元素内部
-      // 如果目标元素或其父元素是可滚动的，则不触发翻页
       const target = e.target as HTMLElement;
       const isScrollable = (el: HTMLElement) => {
         if (!el) return false;
@@ -329,8 +310,6 @@ export default function LinksGrid({
       let currentEl = target;
       while (currentEl && currentEl !== document.body) {
         if (isScrollable(currentEl)) {
-          // 如果内部元素已经滚动到底部或顶部，且继续往那个方向滚，才允许触发外层翻页（可选，这里先完全禁用以保证体验）
-          // 这里我们选择只要在可滚动区域内就禁用外层翻页
           return;
         }
         currentEl = currentEl.parentElement as HTMLElement;
@@ -339,8 +318,7 @@ export default function LinksGrid({
       // 检查是否有垂直滚动位移
       if (Math.abs(e.deltaY) < 30) return;
 
-
-      // 阻止默认滚动行为（虽然已经设置了 overflow-hidden，但这样更稳妥）
+      // 阻止默认滚动行为
       if (e.cancelable) e.preventDefault();
 
       const now = Date.now();
@@ -349,12 +327,12 @@ export default function LinksGrid({
 
       if (e.deltaY > 0) {
         if (currentPage < totalPages) {
-          setCurrentPage(prev => prev + 1);
+          handlePageChange(currentPage + 1);
           lastScrollTime = now;
         }
       } else {
         if (currentPage > 1) {
-          setCurrentPage(prev => prev - 1);
+          handlePageChange(currentPage - 1);
           lastScrollTime = now;
         }
       }
@@ -366,6 +344,8 @@ export default function LinksGrid({
       touchStartX = e.touches[0].clientX;
     };
     const handleTouchEnd = (e: TouchEvent) => {
+      if (isAnimating) return;
+
       const touchEndX = e.changedTouches[0].clientX;
       const deltaX = touchStartX - touchEndX; // 正值表示向左滑（下一页），负值表示向右滑（上一页）
       const now = Date.now();
@@ -374,15 +354,14 @@ export default function LinksGrid({
       
       if (Math.abs(deltaX) > 50) {
         if (deltaX > 0 && currentPage < totalPages) {
-          setCurrentPage(prev => prev + 1);
+          handlePageChange(currentPage + 1);
           lastScrollTime = now;
         } else if (deltaX < 0 && currentPage > 1) {
-          setCurrentPage(prev => prev - 1);
+          handlePageChange(currentPage - 1);
           lastScrollTime = now;
         }
       }
     };
-
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('touchstart', handleTouchStart);
@@ -394,7 +373,8 @@ export default function LinksGrid({
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [currentPage, totalPages]);
+  }, [currentPage, totalPages, isAnimating]);
+
 
 
 
@@ -412,11 +392,11 @@ export default function LinksGrid({
     if (!targetId) return;
     
     // 找到待办事项链接在数组中的位置
-    const todoLinkIndex = links.findIndex(link => link.id === targetId);
+    const todoLinkIndex = safeLinks.findIndex(link => link.id === targetId);
     if (todoLinkIndex === -1) return;
     
     // 更新链接数组中的待办事项数据
-    const newLinks = [...links];
+    const newLinks = [...safeLinks];
     newLinks[todoLinkIndex] = {
       ...newLinks[todoLinkIndex],
       todoItems: newTodos
@@ -434,7 +414,9 @@ export default function LinksGrid({
   const fetchMovieData = async () => {
     setIsLoadingMovie(true);
     try {
-      const response = await fetch('/api/movie-calendar');
+      const response = await fetch('/api/movie-calendar', {
+        cache: 'no-store'
+      });
       if (response.ok) {
         const data = await response.json();
         setMovieData(data);
@@ -600,10 +582,9 @@ export default function LinksGrid({
     return (
       <div className="flex justify-center items-center gap-3 mt-auto py-4 flex-shrink-0">
         {displayPages.map((pageNum) => (
-
           <button
             key={pageNum}
-            onClick={() => setCurrentPage(pageNum)}
+            onClick={() => handlePageChange(pageNum)}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               currentPage === pageNum 
                 ? 'bg-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.8)]' 
@@ -616,6 +597,169 @@ export default function LinksGrid({
     );
   };
 
+  // 渲染卡片的辅助函数
+  const renderCards = (items: any[]) => {
+    return items.map((item: any) => {
+      if (item.isAddCard) {
+        return (
+          <div key="add-card" className={layout === 'masonry' ? 'masonry-item' : ''}>
+            <div 
+              className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card cursor-pointer flex items-center justify-center h-full min-h-[100px] dark:bg-gray-800/80 dark:hover:bg-gray-700/80"
+              onClick={onAddLink}
+            >
+              <i className="fas fa-plus-circle text-3xl"></i>
+            </div>
+          </div>
+        );
+      }
+      
+      if (item.isTodo) {
+        // 渲染待办事项卡片
+        return (
+          <div key={item.id} className="row-span-2">
+            <div 
+              className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
+              draggable="true"
+              onDragStart={(e) => handleDragStart(e, item)}
+              onDragOver={(e) => handleDragOver(e, item)}
+              onDragEnd={handleDragEnd}
+              onDragLeave={handleDragLeave}
+              onClick={() => handleTodoDialogOpen(item)}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded-full">
+                  {(item.todoItems || []).filter((t: any) => !t.completed).length}
+                </span>
+                <h3 className="font-medium truncate text-base text-white">待办事项</h3>
+              </div>
+              <div className="space-y-2 flex-grow overflow-y-auto">
+                {(item.todoItems || []).length > 0 ? (
+                  [...(item.todoItems || [])]
+                    .sort((a: any, b: any) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1))
+                    .slice(0, 3)
+                    .map((todo: any) => (
+                      <div 
+                        key={todo.id} 
+                        className={`flex items-center p-2 rounded-md ${todo.completed ? 'opacity-70' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const updatedItems = item.todoItems.map((t: any) => 
+                            t.id === todo.id ? { ...t, completed: !t.completed } : t
+                          );
+                          handleTodosChange(updatedItems, item.id);
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={todo.completed}
+                          readOnly
+                          className="mr-2 h-4 w-4 text-green-500 rounded focus:ring-green-400 border-gray-300"
+                        />
+                        <span className={`text-sm truncate flex-grow ${todo.completed ? 'line-through text-gray-300' : 'text-white'}`}>
+                          {todo.content}
+                        </span>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center text-gray-500 text-sm py-4">暂无待办事项</div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
+      if (item.isMovieCalendar) {
+        return (
+          <MovieCalendarCard 
+            key={item.id}
+            movieLink={item}
+            movieData={movieData}
+            isLoading={isLoadingMovie}
+            draggedLinkId={draggedLinkId}
+            draggedOverLinkId={draggedOverLinkId}
+            handleDragStart={handleDragStart}
+            handleDragOver={handleDragOver}
+            handleDragEnd={handleDragEnd}
+            handleDragLeave={handleDragLeave}
+            setIsMovieCalendarDialogOpen={setIsMovieCalendarDialogOpen}
+          />
+        );
+      }
+
+      // 渲染普通卡片或知乎热榜
+      return (
+        <div 
+          key={item.id} 
+          className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2' : ''}`}
+        >
+          <div 
+            className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} ${item.isHotBoard ? 'h-full' : ''}`}
+            onContextMenu={(e) => handleContextMenu(e, item)}
+            draggable="true"
+            onDragStart={(e) => handleDragStart(e, item)}
+            onDragOver={(e) => handleDragOver(e, item)}
+            onDragEnd={handleDragEnd}
+            onDragLeave={handleDragLeave}
+            onClick={(e) => {
+              if (item.isHotBoard && onHotBoardClick) {
+                e.preventDefault();
+                onHotBoardClick();
+              }
+            }}
+          >
+            {item.isHotBoard ? (
+              <div className="flex flex-col max-h-[160px]">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
+                    <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
+                      <i className="fas fa-fire text-xl text-orange-500"></i>
+                    </div>
+                    <span className="font-medium truncate text-base">知乎热榜</span>
+                  </div>
+                </div>
+                    <div className="space-y-2 mt-2 flex-grow">
+                      {isLoadingHotBoard ? (
+                        <div className="text-center py-2"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
+                      ) : hotBoardData.length === 0 ? (
+                        <div className="text-sm text-gray-300 text-center py-2">暂无数据</div>
+                      ) : (
+                        hotBoardData.map((h, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <span className="text-xs font-medium text-gray-400 w-4">{index + 1}</span>
+                            <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow">{h.title}</a>
+                          </div>
+                        ))
+                      )}
+                    </div>
+              </div>
+            ) : (
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4 w-full">
+                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                    {item.useFavicon ? (
+                      <div className="relative w-10 h-10 rounded">
+                        <img 
+                          src={getFaviconUrl(item.url)} 
+                          alt={`${item.name}图标`} 
+                          className="w-full h-full rounded" 
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
+                        />
+                      </div>
+                    ) : (
+                      <i className={`${item.icon || 'fas fa-link'} text-3xl`}></i>
+                    )}
+                  </div>
+                  <span className="font-medium truncate text-base">{item.name}</span>
+                </div>
+              </div>
+            )}
+            {!item.isHotBoard && <a href={item.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>}
+          </div>
+        </div>
+      );
+    });
+  };
 
   return (
     <div className="w-full max-w-7xl flex flex-col flex-grow overflow-hidden">
@@ -636,171 +780,30 @@ export default function LinksGrid({
       </div>
 
       {/* 链接网格 - 确保有足够的空间显示所有卡片 */}
-      <div id="links-grid" className={`${getGridClasses()} min-h-[200px] flex-grow content-start overflow-hidden`}>
+      <div id="links-grid-container" className="flex-grow relative overflow-hidden">
+        {/* 上一页 (退出中) */}
+        {isAnimating && (
+          <div 
+            key={`page-out-${prevPage}`}
+            className={`${getGridClasses()} min-h-[200px] content-start absolute inset-0 ${
+              direction === 'next' ? 'animate-slide-out-left' : 'animate-slide-out-right'
+            }`}
+          >
+            {renderCards(pages[prevPage - 1] || [])}
+          </div>
+        )}
 
-        {/* 渲染当前页的所有卡片 */}
-        {currentItems.map((item: any) => {
-          if (item.isAddCard) {
-            return (
-              <div key="add-card" className={layout === 'masonry' ? 'masonry-item' : ''}>
-                <div 
-                  className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card cursor-pointer flex items-center justify-center h-full min-h-[100px] dark:bg-gray-800/80 dark:hover:bg-gray-700/80"
-                  onClick={onAddLink}
-                >
-                  <i className="fas fa-plus-circle text-3xl"></i>
-                </div>
-              </div>
-            );
-          }
-          
-          if (item.isTodo) {
-            // 渲染待办事项卡片
-            return (
-              <div key={item.id} className="row-span-2">
-                <div 
-                  className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
-                  draggable="true"
-                  onDragStart={(e) => handleDragStart(e, item)}
-                  onDragOver={(e) => handleDragOver(e, item)}
-                  onDragEnd={handleDragEnd}
-                  onDragLeave={handleDragLeave}
-                  onClick={() => handleTodoDialogOpen(item)}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded-full">
-                      {(item.todoItems || []).filter((t: any) => !t.completed).length}
-                    </span>
-                    <h3 className="font-medium truncate text-base text-white">待办事项</h3>
-                  </div>
-                  <div className="space-y-2 flex-grow overflow-y-auto">
-                    {(item.todoItems || []).length > 0 ? (
-                      [...(item.todoItems || [])]
-                        .sort((a: any, b: any) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1))
-                        .slice(0, 3)
-                        .map((todo: any) => (
-                          <div 
-                            key={todo.id} 
-                            className={`flex items-center p-2 rounded-md ${todo.completed ? 'opacity-70' : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const updatedItems = item.todoItems.map((t: any) => 
-                                t.id === todo.id ? { ...t, completed: !t.completed } : t
-                              );
-                              handleTodosChange(updatedItems, item.id);
-
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={todo.completed}
-                              readOnly
-                              className="mr-2 h-4 w-4 text-green-500 rounded focus:ring-green-400 border-gray-300"
-                            />
-                            <span className={`text-sm truncate flex-grow ${todo.completed ? 'line-through text-gray-300' : 'text-white'}`}>
-                              {todo.content}
-                            </span>
-                          </div>
-                        ))
-                    ) : (
-                      <div className="text-center text-gray-500 text-sm py-4">暂无待办事项</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          }
-          
-          if (item.isMovieCalendar) {
-            return (
-              <MovieCalendarCard 
-                key={item.id}
-                movieLink={item}
-                movieData={movieData}
-                isLoading={isLoadingMovie}
-                draggedLinkId={draggedLinkId}
-                draggedOverLinkId={draggedOverLinkId}
-                handleDragStart={handleDragStart}
-                handleDragOver={handleDragOver}
-                handleDragEnd={handleDragEnd}
-                handleDragLeave={handleDragLeave}
-                setIsMovieCalendarDialogOpen={setIsMovieCalendarDialogOpen}
-              />
-            );
-          }
-
-          
-          // 渲染普通卡片或知乎热榜
-          return (
-            <div 
-              key={item.id} 
-              className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2' : ''}`}
-            >
-              <div 
-                className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} ${item.isHotBoard ? 'h-full' : ''}`}
-                onContextMenu={(e) => handleContextMenu(e, item)}
-                draggable="true"
-                onDragStart={(e) => handleDragStart(e, item)}
-                onDragOver={(e) => handleDragOver(e, item)}
-                onDragEnd={handleDragEnd}
-                onDragLeave={handleDragLeave}
-                onClick={(e) => {
-                  if (item.isHotBoard && onHotBoardClick) {
-                    e.preventDefault();
-                    onHotBoardClick();
-                  }
-                }}
-              >
-                {item.isHotBoard ? (
-                  <div className="flex flex-col max-h-[160px]">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
-                        <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
-                          <i className="fas fa-fire text-xl text-orange-500"></i>
-                        </div>
-                        <span className="font-medium truncate text-base">知乎热榜</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2 mt-2 flex-grow">
-                      {isLoadingHotBoard ? (
-                        <div className="text-center py-2"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
-                      ) : hotBoardData.length === 0 ? (
-                        <div className="text-sm text-gray-300 text-center py-2">暂无数据</div>
-                      ) : (
-                        hotBoardData.slice(0, 5).map((h, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <span className="text-xs font-medium text-gray-400 w-4">{index + 1}</span>
-                            <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow">{h.title}</a>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-4 w-full">
-                      <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
-                        {item.useFavicon ? (
-                          <div className="relative w-10 h-10 rounded">
-                            <img 
-                              src={getFaviconUrl(item.url)} 
-                              alt={`${item.name}图标`} 
-                              className="w-full h-full rounded" 
-                              onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
-                            />
-                          </div>
-                        ) : (
-                          <i className={`${item.icon || 'fas fa-link'} text-3xl`}></i>
-                        )}
-                      </div>
-                      <span className="font-medium truncate text-base">{item.name}</span>
-                    </div>
-                  </div>
-                )}
-                {!item.isHotBoard && <a href={item.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>}
-              </div>
-            </div>
-          );
-        })}
+        {/* 当前页 (进入中或稳定显示) */}
+        <div 
+          key={`page-in-${currentPage}`}
+          className={`${getGridClasses()} min-h-[200px] content-start absolute inset-0 ${
+            isAnimating 
+              ? direction === 'next' ? 'animate-slide-in-right' : 'animate-slide-in-left'
+              : ''
+          }`}
+        >
+          {renderCards(currentItems)}
+        </div>
       </div>
       
       {/* 分页圆点 */}
