@@ -145,14 +145,12 @@ export default function LinksGrid({
   const [currentPage, setCurrentPage] = useState(1);
   const [prevPage, setPrevPage] = useState(1);
   const [columns, setColumns] = useState(6);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
 
 
   const safeLinks = Array.isArray(links) ? links : [];
-
-  // 分页逻辑 - 统一改回每页5行，确保在移动端浏览器（带地址栏/状态栏）中不被遮挡
-  const rowsPerPage = 5;
 
   
   // 使用 useMemo 避免每次渲染都重新计算分页，确保计算过程纯净
@@ -254,19 +252,30 @@ export default function LinksGrid({
 
   const totalPages = pages.length;
 
-  // 监听窗口大小以确定当前列数
+  // 监听窗口大小以确定当前网格规格
   useEffect(() => {
-    const updateColumns = () => {
+    const updateGridSpec = () => {
       const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      // 更新列数
       if (width >= 1024) setColumns(6);
       else if (width >= 768) setColumns(4);
       else if (width >= 640) setColumns(3);
       else setColumns(2);
+
+      // 更新行数 - 根据屏幕高度动态调整，防止小屏幕内容被截断
+      // 减去头部、搜索栏和页脚的大约高度
+      if (height >= 1200) setRowsPerPage(7); // 超高屏幕（如 iPad 竖屏）增加行数
+      else if (height >= 900) setRowsPerPage(5);
+      else if (height >= 750) setRowsPerPage(4);
+      else if (height >= 580) setRowsPerPage(3);
+      else setRowsPerPage(2);
     };
     
-    updateColumns();
-    window.addEventListener('resize', updateColumns);
-    return () => window.removeEventListener('resize', updateColumns);
+    updateGridSpec();
+    window.addEventListener('resize', updateGridSpec);
+    return () => window.removeEventListener('resize', updateGridSpec);
   }, []);
 
   // 当分类改变时，重置页码
@@ -573,9 +582,8 @@ export default function LinksGrid({
 
   const getGridClasses = () => {
     if (layout === 'grid' || layout === 'list') {
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-4';
+      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-4 content-start items-start';
     } else if (layout === 'masonry') {
-
       return 'masonry-grid';
     }
     return '';
@@ -629,10 +637,10 @@ export default function LinksGrid({
         return (
           <div key="add-card" className={layout === 'masonry' ? 'masonry-item' : ''}>
             <div 
-              className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card cursor-pointer flex items-center justify-center h-full min-h-[100px] dark:bg-gray-800/80 dark:hover:bg-gray-700/80"
+              className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card cursor-pointer flex items-center justify-center h-full min-h-[80px] dark:bg-gray-800/80 dark:hover:bg-gray-700/80"
               onClick={onAddLink}
             >
-              <i className="fas fa-plus-circle text-3xl"></i>
+              <i className="fas fa-plus-circle text-2xl opacity-60 group-hover:opacity-100 transition-opacity"></i>
             </div>
           </div>
         );
@@ -719,7 +727,7 @@ export default function LinksGrid({
           className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2' : ''}`}
         >
           <div 
-            className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} ${item.isHotBoard ? 'h-full' : ''}`}
+            className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} ${item.isHotBoard ? 'h-full' : 'min-h-[80px]'}`}
             onContextMenu={(e) => handleContextMenu(e, item)}
             draggable="true"
             onDragStart={(e) => handleDragStart(e, item)}
@@ -810,7 +818,10 @@ export default function LinksGrid({
         {isAnimating && (
           <div 
             key={`page-out-${prevPage}`}
-            className={`${getGridClasses()} min-h-[200px] content-start absolute inset-0 ${
+            style={{ 
+              gridTemplateRows: layout !== 'masonry' ? `repeat(${rowsPerPage}, minmax(0, 1fr))` : 'none'
+            }}
+            className={`${getGridClasses()} min-h-[200px] absolute inset-0 ${
               direction === 'next' ? 'animate-slide-out-left' : 'animate-slide-out-right'
             }`}
           >
@@ -821,7 +832,10 @@ export default function LinksGrid({
         {/* 当前页 (进入中或稳定显示) */}
         <div 
           key={`page-in-${currentPage}`}
-          className={`${getGridClasses()} min-h-[200px] content-start absolute inset-0 ${
+          style={{ 
+            gridTemplateRows: layout !== 'masonry' ? `repeat(${rowsPerPage}, minmax(0, 1fr))` : 'none'
+          }}
+          className={`${getGridClasses()} min-h-[200px] absolute inset-0 ${
             isAnimating 
               ? direction === 'next' ? 'animate-slide-in-right' : 'animate-slide-in-left'
               : ''

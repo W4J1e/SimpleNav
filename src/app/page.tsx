@@ -473,13 +473,13 @@ export default function HomePage() {
         darkMode={settings.darkMode}
       />
       
-      <main className="flex-grow p-4 md:p-12 flex flex-col items-center overflow-hidden">
+      <main className="flex-grow p-4 md:p-12 pb-2 flex flex-col items-center overflow-hidden">
         <Search 
           searchEngine={settings.searchEngine}
           onSearchEngineChange={handleSearchEngineChange}
         />
         
-        <div className="w-full max-w-7xl mt-4 md:mt-8 flex-grow overflow-hidden flex flex-col">
+        <div className="w-full max-w-7xl mt-2 md:mt-8 flex-grow overflow-hidden flex flex-col">
 
           {/* 链接网格 - 包含所有卡片，包括待办组件 */}
           <LinksGrid 
