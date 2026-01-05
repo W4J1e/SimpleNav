@@ -651,7 +651,7 @@ export default function LinksGrid({
         return (
           <div key={item.id} className="row-span-2">
             <div 
-              className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
+              className={`bg-white/10 backdrop-blur-md rounded-xl p-3 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
               draggable="true"
               onDragStart={(e) => handleDragStart(e, item)}
               onDragOver={(e) => handleDragOver(e, item)}
@@ -659,11 +659,11 @@ export default function LinksGrid({
               onDragLeave={handleDragLeave}
               onClick={() => handleTodoDialogOpen(item)}
             >
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded-full">
                   {(item.todoItems || []).filter((t: any) => !t.completed).length}
                 </span>
-                <h3 className="font-medium truncate text-base text-white">待办事项</h3>
+                <h3 className="font-medium truncate text-sm text-white">待办事项</h3>
               </div>
               <div className="space-y-2 flex-grow overflow-y-auto">
                 {(item.todoItems || []).length > 0 ? (
@@ -742,25 +742,25 @@ export default function LinksGrid({
             }}
           >
             {item.isHotBoard ? (
-              <div className="flex flex-col max-h-[160px]">
-                <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col max-h-[155px]">
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
-                    <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
-                      <i className="fas fa-fire text-xl text-orange-500"></i>
+                    <div className="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                      <i className="fas fa-fire text-base text-orange-500"></i>
                     </div>
-                    <span className="font-medium truncate text-base">知乎热榜</span>
+                    <span className="font-medium truncate text-sm">知乎热榜</span>
                   </div>
                 </div>
-                    <div className="space-y-2 mt-2 flex-grow">
+                    <div className="space-y-1.5 mt-1.5 flex-grow">
                       {isLoadingHotBoard ? (
-                        <div className="text-center py-2"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
+                        <div className="text-center py-1.5"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
                       ) : hotBoardData.length === 0 ? (
-                        <div className="text-sm text-gray-300 text-center py-2">暂无数据</div>
+                        <div className="text-xs text-gray-300 text-center py-1.5">暂无数据</div>
                       ) : (
                         hotBoardData.map((h, index) => (
                           <div key={index} className="flex items-start gap-2">
-                            <span className="text-xs font-medium text-gray-400 w-4">{index + 1}</span>
-                            <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow">{h.title}</a>
+                            <span className="text-xs font-medium text-gray-400 w-4 flex-shrink-0">{index + 1}</span>
+                            <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow leading-tight">{h.title}</a>
                           </div>
                         ))
                       )}
