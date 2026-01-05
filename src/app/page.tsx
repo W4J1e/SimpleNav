@@ -22,7 +22,7 @@ export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // 使用useRef追踪是否已初始化，避免重复同步
   const wasInitializedRef = useRef(false);
-  
+
   const [isLinkFormOpen, setIsLinkFormOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -31,6 +31,14 @@ export default function HomePage() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isZhihuHotBoardOpen, setIsZhihuHotBoardOpen] = useState(false);
   const [showAuthExpiredToast, setShowAuthExpiredToast] = useState(false);
+  const [paginationState, setPaginationState] = useState<{ currentPage: number; totalPages: number }>({
+    currentPage: 1,
+    totalPages: 1
+  });
+
+  const handlePaginationChange = (page: number, totalPages: number) => {
+    setPaginationState({ currentPage: page, totalPages });
+  };
 
   
   // 页面加载时立即检查认证状态，只检查一次
@@ -482,7 +490,7 @@ export default function HomePage() {
         <div className="w-full max-w-7xl mt-2 md:mt-8 flex-grow overflow-hidden flex flex-col">
 
           {/* 链接网格 - 包含所有卡片，包括待办组件 */}
-          <LinksGrid 
+          <LinksGrid
             links={links}
             layout={settings.layout}
             enabledComponents={settings.enabledComponents}
@@ -492,15 +500,22 @@ export default function HomePage() {
             onAddLink={toggleLinkForm}
             onLinksReorder={handleLinksReorder}
             onHotBoardClick={toggleZhihuHotBoard}
-
+            onCurrentPageChange={handlePaginationChange}
           />
         </div>
       </main>
       
-      <Footer 
+      <Footer
         onToggleUnifiedSettings={toggleUnifiedSettings}
         onToggleAbout={toggleAbout}
         onToggleHelp={() => setIsHelpOpen(true)}
+        currentPage={paginationState.currentPage}
+        totalPages={paginationState.totalPages}
+        onPageChange={(page) => {
+          // 通过自定义事件通知 LinksGrid 翻页
+          const event = new CustomEvent('pageChange', { detail: page });
+          window.dispatchEvent(event);
+        }}
       />
 
       

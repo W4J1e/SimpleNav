@@ -121,6 +121,7 @@ interface LinksGridProps {
   onAddLink: () => void;
   onLinksReorder: (newOrder: LinkType[]) => void;
   onHotBoardClick?: () => void;
+  onCurrentPageChange?: (page: number, totalPages: number) => void;
 }
 
 export default function LinksGrid({
@@ -132,7 +133,8 @@ export default function LinksGrid({
   onDeleteLink,
   onAddLink,
   onLinksReorder,
-  onHotBoardClick
+  onHotBoardClick,
+  onCurrentPageChange
 }: LinksGridProps) {
   // TodoDialog状态管理
   const [isTodoDialogOpen, setIsTodoDialogOpen] = useState(false);
@@ -264,15 +266,39 @@ export default function LinksGrid({
       else if (width >= 640) setColumns(3);
       else setColumns(2);
 
-      // 更新行数 - 根据屏幕高度动态调整，防止小屏幕内容被截断
-      // 减去头部、搜索栏和页脚的大约高度
-      if (height >= 1200) setRowsPerPage(7); // 超高屏幕（如 iPad 竖屏）增加行数
-      else if (height >= 900) setRowsPerPage(5);
-      else if (height >= 750) setRowsPerPage(4);
-      else if (height >= 580) setRowsPerPage(3);
-      else setRowsPerPage(2);
+      // 更新行数 - 根据实际可用空间动态计算
+      // 减去头部、搜索栏、分类标签、页脚等固定元素的高度
+      // Header: ~64px
+      // Main padding: ~48px (md) or ~16px
+      // Search: ~96px (包括输入框和mb-8)
+      // 分类标签: ~56px (pb-4 + 标签高度)
+      // Main margin-top: ~32px (md:mt-8) or ~8px
+      // Footer: ~48px
+      // 额外边距: 为防止小组件卡片重叠，预留一些额外空间
+      const headerHeight = 64;
+      const mainPadding = width >= 768 ? 48 : 16;
+      const searchHeight = 96;
+      const tabsHeight = 56;
+      const mainMarginTop = width >= 768 ? 32 : 8;
+      const footerHeight = 48;
+      const extraMargin = 20; // 额外边距，防止重叠
+
+      // 计算可用高度
+      const availableHeight = height - headerHeight - mainPadding - searchHeight - tabsHeight - mainMarginTop - footerHeight - extraMargin;
+
+      // 计算每行高度（卡片最小高度 + 间距）
+      // 中等屏幕卡片最小80px，间距16px；小屏幕间距12px
+      const cardMinHeight = 80;
+      const gapY = width >= 768 ? 16 : 12;
+      const rowHeight = cardMinHeight + gapY;
+
+      // 动态计算行数，至少显示2行，最多不限制
+      // 使用 Math.floor 向下取整，确保不会溢出
+      const calculatedRows = Math.max(2, Math.floor(availableHeight / rowHeight));
+
+      setRowsPerPage(calculatedRows);
     };
-    
+
     updateGridSpec();
     window.addEventListener('resize', updateGridSpec);
     return () => window.removeEventListener('resize', updateGridSpec);
@@ -282,6 +308,30 @@ export default function LinksGrid({
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory]);
+
+  // 页面切换处理函数
+  const handlePageChange = (newPage: number) => {
+    if (newPage === currentPage || isAnimating) return;
+    setPrevPage(currentPage);
+    setDirection(newPage > currentPage ? 'next' : 'prev');
+    setIsAnimating(true);
+    setCurrentPage(newPage);
+    if (onCurrentPageChange) {
+      onCurrentPageChange(newPage, totalPages);
+    }
+    // 动画时间与 CSS transition 保持一致 (500ms)
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  // 监听外部页面切换事件（来自Footer）
+  useEffect(() => {
+    const handlePageChangeEvent = (e: CustomEvent) => {
+      handlePageChange(e.detail);
+    };
+
+    window.addEventListener('pageChange', handlePageChangeEvent as EventListener);
+    return () => window.removeEventListener('pageChange', handlePageChangeEvent as EventListener);
+  }, [currentPage, totalPages, isAnimating]);
 
   // 确保当前页码在有效范围内
   useEffect(() => {
@@ -308,17 +358,6 @@ export default function LinksGrid({
     }
     return ['all', '常用', ...Array.from(linkCategories)];
   }, [safeLinks, enabledComponents]);
-
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage === currentPage || isAnimating) return;
-    setPrevPage(currentPage);
-    setDirection(newPage > currentPage ? 'next' : 'prev');
-    setIsAnimating(true);
-    setCurrentPage(newPage);
-    // 动画时间与 CSS transition 保持一致 (500ms)
-    setTimeout(() => setIsAnimating(false), 500);
-  };
 
   // 处理滚轮和触摸翻页
   useEffect(() => {
@@ -582,7 +621,7 @@ export default function LinksGrid({
 
   const getGridClasses = () => {
     if (layout === 'grid' || layout === 'list') {
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-4 content-start items-start';
+      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 gap-y-3 md:gap-4 md:gap-y-4 content-start items-start';
     } else if (layout === 'masonry') {
       return 'masonry-grid';
     }
@@ -590,45 +629,6 @@ export default function LinksGrid({
   };
 
   const currentItems = pages[currentPage - 1] || [];
-
-
-
-
-
-  // 获取显示的页码圆点
-  const getPaginationDots = () => {
-    if (totalPages <= 1) return null;
-    
-    let displayPages: number[] = [];
-    if (totalPages <= 3) {
-      displayPages = Array.from({ length: totalPages }, (_, i) => i + 1);
-    } else {
-      if (currentPage < 3) {
-        displayPages = [1, 2, 3];
-      } else if (currentPage >= totalPages) {
-        displayPages = [totalPages - 2, totalPages - 1, totalPages];
-      } else {
-        displayPages = [currentPage - 1, currentPage, currentPage + 1];
-      }
-    }
-
-    return (
-      <div className="flex justify-center items-center gap-3 mt-auto py-4 flex-shrink-0">
-        {displayPages.map((pageNum) => (
-          <button
-            key={pageNum}
-            onClick={() => handlePageChange(pageNum)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              currentPage === pageNum 
-                ? 'bg-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.8)]' 
-                : 'bg-white/30 hover:bg-white/50'
-            }`}
-            title={`第 ${pageNum} 页`}
-          />
-        ))}
-      </div>
-    );
-  };
 
   // 渲染卡片的辅助函数
   const renderCards = (items: any[]) => {
@@ -844,9 +844,6 @@ export default function LinksGrid({
           {renderCards(currentItems)}
         </div>
       </div>
-      
-      {/* 分页圆点 */}
-      {getPaginationDots()}
 
       
       {contextMenu.visible && contextMenu.link && (
