@@ -53,7 +53,7 @@ const MovieCalendarCard = ({
   const isOver = draggedOverLinkId === movieLink.id;
 
   return (
-    <div key={movieLink.id} className="col-span-2 row-span-2">
+    <div key={movieLink.id} className="col-span-2 row-span-2 h-full">
       <div 
         className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full overflow-hidden ${isDragging ? 'opacity-50 transform scale-105' : ''} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
         draggable="true"
@@ -759,7 +759,7 @@ export default function LinksGrid({
                       ) : (
                         hotBoardData.map((h, index) => (
                           <div key={index} className="flex items-start gap-2">
-                            <span className="text-xs font-medium text-gray-400 w-4 flex-shrink-0">{index + 1}</span>
+                            <span className="text-xs font-medium text-white w-4 flex-shrink-0">{index + 1}</span>
                             <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow leading-tight">{h.title}</a>
                           </div>
                         ))
