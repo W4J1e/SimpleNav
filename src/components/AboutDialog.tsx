@@ -78,7 +78,7 @@ export default function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
           
           <div className="border-t dark:border-gray-700 pt-4">
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              © 2025 <a href="https://github.com/W4J1e/Simplenav" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline dark:text-blue-400">SimpleNav</a>. 保留所有权利.
+              © 2026 <a href="https://github.com/W4J1e/Simplenav" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline dark:text-blue-400">SimpleNav</a>. 保留所有权利.
             </p>
           </div>
         </div>

@@ -83,14 +83,14 @@ export async function GET() {
     return NextResponse.json({ 
       success: false, 
       error: '所有图片源都不可用',
-      imageUrl: 'https://cdn2.hin.cool/pic/bg/lg3.jpg'
+      imageUrl: 'https://cn.bing.com/th?id=OHR.OldRockArch_EN-US2422589534_1920x1080.jpg'
     });
   } catch (error) {
     console.error('获取Bing图片失败:', error);
     return NextResponse.json({ 
       success: false, 
       error: '服务器错误',
-      imageUrl: 'https://cdn2.hin.cool/pic/bg/lg3.jpg'
+      imageUrl: 'https://cn.bing.com/th?id=OHR.OldRockArch_EN-US2422589534_1920x1080.jpg'
     });
   }
 }
