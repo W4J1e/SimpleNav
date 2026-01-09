@@ -14,7 +14,7 @@ import { Link, Settings } from '@/types';
 import { getLinks, saveLinks, getSettings, saveSettings, useOneDriveStorage, setUseOneDriveStorage, syncFromOneDrive, syncData, defaultSettings } from '@/lib/storage';
 import { oneDriveStorage } from '@/lib/onedrive-storage';
 
-import { getGradientBackground, getBingImage } from '@/lib/utils';
+import { applyAppBackground } from '@/lib/utils';
 
 export default function HomePage() {
   const [links, setLinks] = useState<Link[]>([]);
@@ -70,10 +70,11 @@ export default function HomePage() {
             syncData().then(hasChanges => {
               if (hasChanges) {
                 // 同步成功后更新页面数据
-                setLinks(getLinks());
+                const currentLinks = getLinks();
+                setLinks(currentLinks);
                 // 仅当设置发生变化时才更新settings状态
                 const newSettings = getSettings();
-                if (JSON.stringify(newSettings) !== JSON.stringify(settings)) {
+                if (newSettings && JSON.stringify(newSettings) !== JSON.stringify(settings)) {
                   setSettings(newSettings);
                 }
               }
@@ -112,232 +113,7 @@ export default function HomePage() {
     });
     
     // 移除定期检查，只在首次打开网页时检查一次
-  }, [settings]);
-
-  // 预加载图片函数
-  const preloadImage = (url: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(url);
-      img.onerror = reject;
-      img.src = url;
-    });
-  };
-
-  // 应用背景设置
-  const applyBackground = async (settings: Settings) => {
-    // 确保在客户端执行
-    if (typeof window === 'undefined') return;
-    
-    // 获取body元素
-    const body = document.getElementById('app-body') || document.body;
-    if (!body) return;
-    
-    // 设置CSS变量
-    const root = document.documentElement;
-    
-    // 设置基础背景样式（不清除背景图）
-    body.style.backgroundSize = 'cover';
-    body.style.backgroundPosition = 'center';
-    body.style.backgroundAttachment = 'fixed';
-    body.style.backgroundRepeat = 'no-repeat';
-    
-    // 根据背景类型设置不同的CSS变量
-    if (settings.bgType === 'color') {
-      root.style.setProperty('--bg-image', 'none');
-      root.style.setProperty('--bg-color', settings.bgColor);
-      // 直接设置body背景
-      body.style.backgroundImage = 'none';
-      body.style.backgroundColor = settings.bgColor;
-    } else if (settings.bgType === 'image' && settings.bgImageUrl) {
-      try {
-        // 预加载图片
-        await preloadImage(settings.bgImageUrl);
-        
-        root.style.setProperty('--bg-image', `url(${settings.bgImageUrl})`);
-        root.style.setProperty('--bg-color', 'transparent');
-        // 直接设置body背景
-        body.style.backgroundImage = `url(${settings.bgImageUrl})`;
-        body.style.backgroundColor = 'transparent';
-      } catch (error) {
-        console.error('加载图片失败:', error);
-        // 使用默认图片
-        const defaultUrl = 'https://cdn2.hin.cool/pic/bg/lg3.jpg';
-        root.style.setProperty('--bg-image', `url(${defaultUrl})`);
-        root.style.setProperty('--bg-color', 'transparent');
-        body.style.backgroundImage = `url(${defaultUrl})`;
-        body.style.backgroundColor = 'transparent';
-      }
-    } else if (settings.bgType === 'gradient') {
-      const gradient = getGradientBackground(settings.gradientPreset);
-      root.style.setProperty('--bg-image', gradient);
-      root.style.setProperty('--bg-color', 'transparent');
-      // 直接设置body背景
-      body.style.backgroundImage = gradient;
-      body.style.backgroundColor = 'transparent';
-    } else if (settings.bgType === 'upload' && settings.bgUploadUrl) {
-      try {
-        // 预加载上传的图片
-        await preloadImage(settings.bgUploadUrl);
-        
-        root.style.setProperty('--bg-image', `url(${settings.bgUploadUrl})`);
-        root.style.setProperty('--bg-color', 'transparent');
-        // 直接设置body背景
-        body.style.backgroundImage = `url(${settings.bgUploadUrl})`;
-        body.style.backgroundColor = 'transparent';
-      } catch (error) {
-        console.error('加载上传图片失败:', error);
-        // 使用默认图片
-        const defaultUrl = 'https://cdn2.hin.cool/pic/bg/lg3.jpg';
-        root.style.setProperty('--bg-image', `url(${defaultUrl})`);
-        root.style.setProperty('--bg-color', 'transparent');
-        body.style.backgroundImage = `url(${defaultUrl})`;
-        body.style.backgroundColor = 'transparent';
-      }
-    } else if (settings.bgType === 'bing') {
-      try {
-        const imageUrl = await getBingImage();
-        if (imageUrl) {
-          // 预加载Bing图片
-          await preloadImage(imageUrl);
-          
-          root.style.setProperty('--bg-image', `url(${imageUrl})`);
-          root.style.setProperty('--bg-color', 'transparent');
-          // 直接设置body背景
-          body.style.backgroundImage = `url(${imageUrl})`;
-          body.style.backgroundColor = 'transparent';
-        } else {
-          throw new Error('获取的图片URL为空');
-        }
-      } catch (error) {
-        // 使用默认图片
-        const defaultUrl = 'https://cdn2.hin.cool/pic/bg/lg3.jpg';
-        root.style.setProperty('--bg-image', `url(${defaultUrl})`);
-        root.style.setProperty('--bg-color', 'transparent');
-        body.style.backgroundImage = `url(${defaultUrl})`;
-        body.style.backgroundColor = 'transparent';
-      }
-    }
-  };
-
-  // 初始化数据
-  useEffect(() => {
-    const initializeData = async () => {
-      // 检查URL参数中的认证状态
-      const urlParams = new URLSearchParams(window.location.search);
-      const authParam = urlParams.get('auth');
-      
-      if (authParam === 'success') {
-        // 尝试从cookie获取认证信息并设置到oneDriveStorage
-        try {
-          const response = await fetch('/api/auth/status', { 
-            credentials: 'include',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate'
-            }
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            
-            if (data.authenticated && data.accessToken && data.refreshToken) {
-              // 设置token到存储实例
-              oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
-              // 更新React组件状态
-              setIsAuthenticated(true);
-            }
-          }
-        } catch (error) {
-          console.error('检查认证状态失败:', error);
-        }
-        
-        // 移除URL参数避免重复触发
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, '', newUrl);
-      }
-      
-      // 1. 首先使用本地存储加载数据
-      let loadedLinks = getLinks();
-      let loadedSettings = getSettings();
-      
-      // 确保links是数组并去重
-      if (Array.isArray(loadedLinks)) {
-        const seen = new Set();
-        loadedLinks = loadedLinks.filter(link => {
-          if (!link.id || seen.has(link.id)) return false;
-          seen.add(link.id);
-          return true;
-        });
-      } else {
-        loadedLinks = [];
-      }
-
-      
-      // 检查是否有热榜卡片，如果没有则添加
-      const hasHotBoard = loadedLinks.some(link => link.isHotBoard || link.id === 'zhihu-hot-board');
-      if (!hasHotBoard) {
-        const hotBoardLink: Link = {
-          id: 'zhihu-hot-board',
-          name: '知乎热榜',
-          url: '#',
-          icon: 'fa-fire',
-          category: '常用',
-          useFavicon: false,
-          isHotBoard: true
-        };
-        loadedLinks = [hotBoardLink, ...loadedLinks];
-      }
-      
-      // 检查是否有待办事项卡片，如果没有则添加
-      const hasTodoCard = loadedLinks.some(link => link.isTodo || link.id === 'todo-card');
-      if (!hasTodoCard) {
-        const todoLink: Link = {
-          id: 'todo-card',
-          name: '待办事项',
-          url: '#',
-          icon: 'fa-list-check',
-          category: '常用',
-          useFavicon: false,
-          isTodo: true,
-          todoItems: []
-        };
-        loadedLinks = [todoLink, ...loadedLinks];
-      }
-      
-      // 检查是否有电影日历卡片，如果没有则添加
-      const hasMovieCalendar = loadedLinks.some(link => link.isMovieCalendar || link.id === 'movie-calendar');
-      if (!hasMovieCalendar) {
-        const movieCalendarLink: Link = {
-          id: 'movie-calendar',
-          name: '电影日历',
-          url: '#',
-          icon: 'fa-film',
-          category: '常用',
-          useFavicon: false,
-          isMovieCalendar: true
-        };
-        loadedLinks = [movieCalendarLink, ...loadedLinks];
-      }
-
-      
-      // 2. 立即设置本地数据到组件状态，确保页面快速加载
-      setLinks(loadedLinks);
-      
-      // 确保settings不为null或undefined
-      if (loadedSettings) {
-        setSettings(loadedSettings);
-      } else {
-        // 使用默认设置
-        setSettings(defaultSettings);
-      }
-      
-      // 3. 在后台检测和同步云端数据
-      // 这里暂时不执行后台同步，因为认证状态检查可能还没有完成
-      // 后台同步会在认证状态检查完成后执行
-    };
-    
-    initializeData();
-  }, []);
+  }, []); // 移除 settings 依赖，避免循环触发
 
   // 监听分类变化事件
   useEffect(() => {
@@ -352,10 +128,76 @@ export default function HomePage() {
     };
   }, []);
   
+  // 初始化数据
+  useEffect(() => {
+    const initializeData = async () => {
+      // 检查URL参数中的认证状态
+      const urlParams = new URLSearchParams(window.location.search);
+      const authParam = urlParams.get('auth');
+      
+      if (authParam === 'success') {
+        try {
+          // 认证成功后，尝试从服务器获取最新的token
+          const response = await fetch('/api/auth/status', { 
+            credentials: 'include',
+            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data.authenticated && data.accessToken && data.refreshToken) {
+              oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
+              setIsAuthenticated(true);
+            }
+          }
+        } catch (error) {
+          console.error('认证回调处理失败:', error);
+        }
+        // 移除参数
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }
+      
+      // 1. 首先使用本地存储加载数据
+      let loadedLinks = getLinks();
+      let loadedSettings = getSettings() || defaultSettings;
+      
+      // 2. 确保links是合法数组并去重
+      if (Array.isArray(loadedLinks)) {
+        const seen = new Set();
+        loadedLinks = loadedLinks.filter(link => {
+          if (!link.id || seen.has(link.id)) return false;
+          seen.add(link.id);
+          return true;
+        });
+      } else {
+        loadedLinks = [];
+      }
+
+      // 3. 检查并强制注入必要的基础组件卡片（如果列表中不存在）
+      const essentialCards = [
+        { id: 'zhihu-hot-board', name: '知乎热榜', url: '#', icon: 'fa-fire', category: '常用', useFavicon: false, isHotBoard: true },
+        { id: 'todo-card', name: '待办事项', url: '#', icon: 'fa-list-check', category: '常用', useFavicon: false, isTodo: true, todoItems: [] },
+        { id: 'movie-calendar', name: '电影日历', url: '#', icon: 'fa-film', category: '常用', useFavicon: false, isMovieCalendar: true }
+      ];
+
+      essentialCards.forEach(card => {
+        if (!loadedLinks.some(l => l.id === card.id)) {
+          loadedLinks = [card as Link, ...loadedLinks];
+        }
+      });
+      
+      // 4. 立即应用数据
+      setLinks(loadedLinks);
+      setSettings(loadedSettings);
+    };
+    
+    initializeData();
+  }, []);
+
   // 监听settings变化，应用背景和主题
   useEffect(() => {
     if (settings) {
-      applyBackground(settings);
+      applyAppBackground(settings);
       
       // 应用主题
       if (settings.darkMode) {
@@ -406,7 +248,7 @@ export default function HomePage() {
   const handleSaveSettings = (newSettings: Settings) => {
     setSettings(newSettings);
     saveSettings(newSettings);
-    applyBackground(newSettings);
+    applyAppBackground(newSettings);
   };
 
   // 保存链接

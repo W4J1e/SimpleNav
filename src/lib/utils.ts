@@ -1,3 +1,13 @@
+import { Settings } from '@/types';
+
+// 默认背景图片 URL
+export const DEFAULT_BG_IMAGE = 'https://cn.bing.com/th?id=OHR.OldRockArch_EN-US2422589534_1920x1080.jpg';
+
+// Bing 图片备用源
+export const BING_IMAGE_SOURCES = [
+  'https://bing.img.run/1920x1080.php'
+];
+
 // 获取网站favicon - 默认方式：直接获取网站的favicon.ico
 export const getFaviconUrl = (url: string): string | undefined => {
   let parsedUrl;
@@ -76,74 +86,135 @@ export const getGradientBackground = (preset: string): string => {
   return gradients[preset as keyof typeof gradients] || gradients['blue-purple'];
 };
 
-// 获取Bing每日一图
-export const getBingImage = async (): Promise<string> => {
-  try {
-    // 首先尝试使用我们自己的API路由，这样可以避免CORS问题
-    const response = await fetch('/api/bing-image', {
-      cache: 'no-store' // 禁用缓存，确保每次都获取最新图片
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.imageUrl) {
-        return data.imageUrl;
-      }
-    }
-    
-    // 如果我们自己的API失败，尝试直接使用备选API
-    const alternativeApis = [
-      'https://api.yuafeng.cn/API/ly/bing/',
-      'https://bing.img.run/rand.php'
-    ];
-    
-    for (const apiUrl of alternativeApis) {
-      try {
-        // 直接返回API URL，让浏览器处理图片加载
-        return apiUrl;
-      } catch (error) {
-        console.error(`尝试API ${apiUrl} 失败:`, error);
-        // 继续尝试下一个API
-        continue;
-      }
-    }
-    
-  } catch (error) {
-    console.error('获取Bing图片失败:', error);
-  }
-  
-  // 如果所有API都失败，使用默认图片
-  const defaultUrl = 'https://cdn2.hin.cool/pic/bg/lg3.jpg';
-  return defaultUrl;
-};
-
 // 预加载图片
 export const preloadImage = (url: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous'; // 启用CORS支持
     
-    img.onload = () => {
-      resolve(url);
-    };
+    // 对于背景图展示，不需要跨域许可，移除 crossOrigin 避免某些镜像站报错
     
-    img.onerror = () => {
-      reject(new Error(`图片加载失败: ${url}`));
-    };
-    
-    // 为图片加载设置超时
     const timeout = setTimeout(() => {
+      img.src = ''; // 停止加载
       reject(new Error(`图片加载超时: ${url}`));
-    }, 10000); // 10秒超时
-    
-    img.src = url;
-    
-    // 清除超时
+    }, 5000); // 缩短超时时间到5秒
+
     img.onload = () => {
       clearTimeout(timeout);
       resolve(url);
     };
+    
+    img.onerror = () => {
+      clearTimeout(timeout);
+      reject(new Error(`图片加载失败: ${url}`));
+    };
+    
+    img.src = url;
   });
+};
+
+// 获取Bing每日一图
+export const getBingImage = async (): Promise<string> => {
+  try {
+    // 1. 尝试使用内置 API
+    const response = await fetch('/api/bing-image', { cache: 'no-store' });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.imageUrl) {
+        try {
+          await preloadImage(data.imageUrl);
+          return data.imageUrl;
+        } catch (e) {
+          console.warn('内置API图片加载失败，尝试备选源');
+        }
+      }
+    }
+    
+    // 2. 尝试备选源，必须经过验证
+    const alternativeApis = BING_IMAGE_SOURCES;
+    for (const apiUrl of alternativeApis) {
+      try {
+        await preloadImage(apiUrl);
+        return apiUrl;
+      } catch (error) {
+        console.error(`备选源 ${apiUrl} 无效:`, error);
+        continue;
+      }
+    }
+  } catch (error) {
+    console.error('获取Bing图片过程出错:', error);
+  }
+  
+  // 3. 终极兜底
+  return DEFAULT_BG_IMAGE;
+};
+
+// 统一应用背景逻辑
+export const applyAppBackground = (settings: Settings) => {
+  if (typeof window === 'undefined') return;
+
+  const root = document.documentElement;
+  const body = document.getElementById('app-body') || document.body;
+  if (!body) return;
+
+  // 设置基础背景样式
+  body.style.backgroundSize = 'cover';
+  body.style.backgroundPosition = 'center';
+  body.style.backgroundAttachment = 'fixed';
+  body.style.backgroundRepeat = 'no-repeat';
+
+  const setStyles = (bgImage: string, bgColor: string = 'transparent') => {
+    root.style.setProperty('--bg-image', bgImage);
+    root.style.setProperty('--bg-color', bgColor);
+    body.style.backgroundImage = bgImage;
+    body.style.backgroundColor = bgColor;
+  };
+
+  // 1. 同步部分立即应用
+  if (settings.bgType === 'color') {
+    setStyles('none', settings.bgColor);
+    return;
+  } 
+  
+  if (settings.bgType === 'gradient') {
+    setStyles(getGradientBackground(settings.gradientPreset));
+    return;
+  }
+
+  // 2. 异步加载前，先确保有一个基础背景（如果是首次进入）
+  if (!body.style.backgroundImage || body.style.backgroundImage === 'none') {
+    setStyles(`url(${DEFAULT_BG_IMAGE})`);
+  }
+
+  // 3. 异步处理
+  const loadAsyncBackground = async () => {
+    try {
+      let targetUrl = DEFAULT_BG_IMAGE;
+
+      if (settings.bgType === 'image' && settings.bgImageUrl) {
+        targetUrl = settings.bgImageUrl;
+      } else if (settings.bgType === 'upload' && settings.bgUploadUrl) {
+        targetUrl = settings.bgUploadUrl;
+      } else if (settings.bgType === 'bing') {
+        targetUrl = await getBingImage();
+      } else {
+        targetUrl = DEFAULT_BG_IMAGE;
+      }
+
+      // 所有的网络图片在应用前都进行最后的加载验证
+      try {
+        await preloadImage(targetUrl);
+        setStyles(`url(${targetUrl})`);
+      } catch (e) {
+        console.warn('目标背景图加载失败，回退到默认图:', targetUrl);
+        setStyles(`url(${DEFAULT_BG_IMAGE})`);
+      }
+    } catch (error) {
+      console.error('背景处理逻辑崩溃:', error);
+      setStyles(`url(${DEFAULT_BG_IMAGE})`);
+    }
+  };
+
+  loadAsyncBackground();
 };
 
 // 格式化时间

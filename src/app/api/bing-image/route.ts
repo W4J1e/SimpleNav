@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
+import { DEFAULT_BG_IMAGE, BING_IMAGE_SOURCES } from '@/lib/utils';
 
 export async function GET() {
   try {
     // 尝试从多个源获取Bing图片
-    const sources = [
-      'https://bing.img.run/1920x1080.php',
-      'https://api.yuafeng.cn/API/ly/bing/',
-      'https://uapis.cn/api/v1/image/bing-daily',
-      'https://bing.img.run/rand.php'
-    ];
+    const sources = BING_IMAGE_SOURCES;
     
     let imageUrl = '';
     let sourceUsed = '';
@@ -83,14 +79,14 @@ export async function GET() {
     return NextResponse.json({ 
       success: false, 
       error: '所有图片源都不可用',
-      imageUrl: 'https://cn.bing.com/th?id=OHR.OldRockArch_EN-US2422589534_1920x1080.jpg'
+      imageUrl: DEFAULT_BG_IMAGE
     });
   } catch (error) {
     console.error('获取Bing图片失败:', error);
     return NextResponse.json({ 
       success: false, 
       error: '服务器错误',
-      imageUrl: 'https://cn.bing.com/th?id=OHR.OldRockArch_EN-US2422589534_1920x1080.jpg'
+      imageUrl: DEFAULT_BG_IMAGE
     });
   }
 }

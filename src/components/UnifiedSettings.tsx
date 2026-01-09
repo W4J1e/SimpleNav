@@ -5,7 +5,7 @@ import { syncFromOneDrive, syncToOneDrive } from '@/lib/storage';
 import { oneDriveStorage } from '@/lib/onedrive-storage';
 import { Link, Settings } from '@/types';
 import { getLinks, saveLinks, getSettings, saveSettings } from '@/lib/storage';
-import { getGradientBackground, getBingImage } from '@/lib/utils';
+import { applyAppBackground } from '@/lib/utils';
 
 interface UnifiedSettingsProps {
   isOpen: boolean;
@@ -325,70 +325,7 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
     
     // 如果是背景相关设置变化，立即应用背景
     if (key === 'bgType' || key === 'bgColor' || key === 'bgImageUrl' || key === 'bgUploadUrl' || key === 'gradientPreset') {
-      applyBackground(newSettings);
-    }
-  };
-
-  // 应用背景设置
-  const applyBackground = async (settings: Settings) => {
-    // 确保在客户端执行
-    if (typeof window === 'undefined') return;
-    
-    // 获取body元素
-    const body = document.getElementById('app-body') || document.body;
-    if (!body) return;
-    
-    // 设置CSS变量
-    const root = document.documentElement;
-    
-    // 根据背景类型设置不同的CSS变量
-    if (settings.bgType === 'color') {
-      root.style.setProperty('--bg-image', 'none');
-      root.style.setProperty('--bg-color', settings.bgColor);
-      // 直接设置body背景
-      body.style.backgroundImage = 'none';
-      body.style.backgroundColor = settings.bgColor;
-    } else if (settings.bgType === 'image' && settings.bgImageUrl) {
-      root.style.setProperty('--bg-image', `url(${settings.bgImageUrl})`);
-      root.style.setProperty('--bg-color', 'transparent');
-      // 直接设置body背景
-      body.style.backgroundImage = `url(${settings.bgImageUrl})`;
-      body.style.backgroundColor = 'transparent';
-    } else if (settings.bgType === 'gradient') {
-      const gradient = getGradientBackground(settings.gradientPreset);
-      root.style.setProperty('--bg-image', gradient);
-      root.style.setProperty('--bg-color', 'transparent');
-      // 直接设置body背景
-      body.style.backgroundImage = gradient;
-      body.style.backgroundColor = 'transparent';
-    } else if (settings.bgType === 'upload' && settings.bgUploadUrl) {
-      root.style.setProperty('--bg-image', `url(${settings.bgUploadUrl})`);
-      root.style.setProperty('--bg-color', 'transparent');
-      // 直接设置body背景
-      body.style.backgroundImage = `url(${settings.bgUploadUrl})`;
-      body.style.backgroundColor = 'transparent';
-    } else if (settings.bgType === 'bing') {
-      try {
-        const imageUrl = await getBingImage();
-        if (imageUrl) {
-          // 直接设置背景，不进行图片预加载（避免CORS问题）
-          // 由于API直接返回图片，浏览器会自动处理图片加载
-          root.style.setProperty('--bg-image', `url(${imageUrl})`);
-          root.style.setProperty('--bg-color', 'transparent');
-          // 直接设置body背景
-          body.style.backgroundImage = `url(${imageUrl})`;
-          body.style.backgroundColor = 'transparent';
-        } else {
-          throw new Error('获取的图片URL为空');
-        }
-      } catch (error) {
-        // 使用默认图片
-        const defaultUrl = 'https://cdn2.hin.cool/pic/bg/lg3.jpg';
-        root.style.setProperty('--bg-image', `url(${defaultUrl})`);
-        root.style.setProperty('--bg-color', 'transparent');
-        body.style.backgroundImage = `url(${defaultUrl})`;
-        body.style.backgroundColor = 'transparent';
-      }
+      applyAppBackground(newSettings);
     }
   };
 
@@ -593,7 +530,7 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
                               handleSettingChange('bgUploadUrl', result);
                               // 立即应用背景
                               const newSettings = { ...settings, bgUploadUrl: result, bgType: 'upload' as const };
-                              applyBackground(newSettings);
+                              applyAppBackground(newSettings);
                             };
                             reader.readAsDataURL(file);
                           }
