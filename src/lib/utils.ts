@@ -3,8 +3,11 @@ import { Settings } from '@/types';
 // 默认背景图片 URL
 export const DEFAULT_BG_IMAGE = 'https://cn.bing.com/th?id=OHR.OldRockArch_EN-US2422589534_1920x1080.jpg';
 
-// Bing 图片备用源
+// Bing 图片源
 export const BING_IMAGE_SOURCES = [
+  'https://bing.ee123.net/img/',
+  'https://api.xinyew.cn/api/bing',
+  'https://api.nxvav.cn/api/bing/',
   'https://bing.img.run/1920x1080.php'
 ];
 
