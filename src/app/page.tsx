@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Header from '@/components/Header';
 import Search from '@/components/Search';
 import LinksGrid from '@/components/LinksGrid';
@@ -35,6 +35,19 @@ export default function HomePage() {
     currentPage: 1,
     totalPages: 1
   });
+
+  // 从links中提取所有唯一分类
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    links.forEach(link => {
+      if (link.category) {
+        uniqueCategories.add(link.category);
+      }
+    });
+    // 添加默认分类"未分类"，并排序
+    uniqueCategories.add('未分类');
+    return Array.from(uniqueCategories).sort();
+  }, [links]);
 
   const handlePaginationChange = (page: number, totalPages: number) => {
     setPaginationState({ currentPage: page, totalPages });
@@ -366,6 +379,7 @@ export default function HomePage() {
         onClose={toggleLinkForm}
         onSave={handleSaveLink}
         link={editingLink}
+        categories={categories}
       />
       
       {/* 统一设置面板 */}

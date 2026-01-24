@@ -9,9 +9,10 @@ interface LinkFormProps {
   onClose: () => void;
   onSave: (link: Link) => void;
   link?: Link | null;
+  categories: string[];
 }
 
-export default function LinkForm({ isOpen, onClose, onSave, link }: LinkFormProps) {
+export default function LinkForm({ isOpen, onClose, onSave, link, categories }: LinkFormProps) {
   const [formData, setFormData] = useState<Link>({
     id: '',
     name: '',
@@ -20,6 +21,27 @@ export default function LinkForm({ isOpen, onClose, onSave, link }: LinkFormProp
     category: '未分类',
     useFavicon: false,
   });
+  
+  // 下拉菜单状态
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.category-selector')) {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+    
+    if (isCategoryDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCategoryDropdownOpen]);
 
   useEffect(() => {
     if (link) {
@@ -114,7 +136,7 @@ export default function LinkForm({ isOpen, onClose, onSave, link }: LinkFormProp
                     name="icon"
                     value={formData.icon}
                     onChange={handleInputChange}
-                    placeholder="Font Awesome图标类名，例如：fa-github" 
+                    placeholder="Font Awesome图标类名，例如：fab fa-github" 
                     className="w-full p-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                   />
                 </div>
@@ -142,16 +164,46 @@ export default function LinkForm({ isOpen, onClose, onSave, link }: LinkFormProp
                 </div>
               </div>
             </div>
-            <div className="mb-4">
+            <div className="mb-4 category-selector">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">链接分类</label>
-              <input 
-                type="text" 
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                placeholder="例如：开发工具" 
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-              />
+              <div className="flex gap-3">
+                <div className="flex-grow relative">
+                  <input 
+                    type="text" 
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    placeholder="例如：开发工具" 
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                  />
+                  
+                  {/* 上拉菜单 */}
+                  {isCategoryDropdownOpen && (
+                    <div className="absolute left-0 right-0 bottom-full mb-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                      {categories.map((category) => (
+                        <button
+                          key={category}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, category }));
+                            setIsCategoryDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all ${formData.category === category ? 'bg-primary/10 text-primary' : 'text-gray-900 dark:text-gray-300'}`}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                  className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-3 rounded-lg transition-all text-gray-700 dark:text-gray-300"
+                >
+                  <i className={`fas ${isCategoryDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </button>
+              </div>
             </div>
             <div className="flex gap-3">
               <button 
