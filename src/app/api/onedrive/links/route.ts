@@ -31,24 +31,41 @@ export async function GET(request: NextRequest) {
     } catch (error: any) {
       // 如果是令牌过期错误，尝试刷新令牌
       if (error.message && error.message.includes('401')) {
-        const { accessToken: newAccessToken } = await refreshAccessToken(user.refreshToken);
-        
-        const oneDriveService = new OneDriveService(newAccessToken);
-        const linksData = await oneDriveService.readFile('links.json');
-        
-        if (linksData) {
-          return NextResponse.json({ links: JSON.parse(linksData) });
-        } else {
-          return NextResponse.json({ links: [] });
+        try {
+          const { accessToken: newAccessToken } = await refreshAccessToken(user.refreshToken);
+          
+          const oneDriveService = new OneDriveService(newAccessToken);
+          const linksData = await oneDriveService.readFile('links.json');
+          
+          if (linksData) {
+            return NextResponse.json({ links: JSON.parse(linksData) });
+          } else {
+            return NextResponse.json({ links: [] });
+          }
+        } catch (refreshError: any) {
+          console.error('刷新令牌失败:', refreshError);
+          return NextResponse.json(
+            { error: '认证令牌已过期且无法刷新' },
+            { status: 401 }
+          );
         }
+      } else if (error.message && error.message.includes('403')) {
+        console.error('OneDrive API 权限错误:', error);
+        return NextResponse.json(
+          { error: 'OneDrive API 权限不足' },
+          { status: 403 }
+        );
+      } else if (error.message && error.message.includes('404')) {
+        console.error('OneDrive 文件不存在:', error);
+        return NextResponse.json({ links: [] });
       }
       
       throw error;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('获取链接失败:', error);
     return NextResponse.json(
-      { error: '获取链接失败' },
+      { error: `获取链接失败: ${error.message || '未知错误'}` },
       { status: 500 }
     );
   }
@@ -89,7 +106,7 @@ export async function POST(request: NextRequest) {
       } else {
         console.error('OneDriveService.writeFile 返回 false');
         return NextResponse.json(
-          { error: '保存链接失败' },
+          { error: 'OneDrive 写入操作失败' },
           { status: 500 }
         );
       }
@@ -111,17 +128,29 @@ export async function POST(request: NextRequest) {
           } else {
             console.error('刷新令牌后，OneDriveService.writeFile 返回 false');
             return NextResponse.json(
-              { error: '保存链接失败' },
+              { error: 'OneDrive 写入操作失败' },
               { status: 500 }
             );
           }
-        } catch (refreshError) {
+        } catch (refreshError: any) {
           console.error('刷新令牌失败:', refreshError);
           return NextResponse.json(
-            { error: '刷新令牌失败' },
-            { status: 500 }
+            { error: '认证令牌已过期且无法刷新' },
+            { status: 401 }
           );
         }
+      } else if (error.message && error.message.includes('403')) {
+        console.error('OneDrive API 权限错误:', error);
+        return NextResponse.json(
+          { error: 'OneDrive API 权限不足' },
+          { status: 403 }
+        );
+      } else if (error.message && error.message.includes('413')) {
+        console.error('OneDrive 文件大小错误:', error);
+        return NextResponse.json(
+          { error: '链接数据过大' },
+          { status: 413 }
+        );
       }
       
       return NextResponse.json(
@@ -129,10 +158,10 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('保存链接失败:', error);
     return NextResponse.json(
-      { error: '保存链接失败' },
+      { error: `保存链接失败: ${error.message || '未知错误'}` },
       { status: 500 }
     );
   }
