@@ -668,7 +668,16 @@ export default function LinksGrid({
               <div className="space-y-2 flex-grow overflow-y-auto">
                 {(item.todoItems || []).length > 0 ? (
                   [...(item.todoItems || [])]
-                    .sort((a: any, b: any) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1))
+                    .sort((a: any, b: any) => {
+                      if (a.completed !== b.completed) {
+                        return a.completed ? 1 : -1;
+                      }
+                      // 对于已完成的，按完成时间倒序；对于未完成的，按创建时间倒序
+                      if (a.completed) {
+                        return (b.completedAt || 0) - (a.completedAt || 0);
+                      }
+                      return b.createdAt - a.createdAt;
+                    })
                     .slice(0, 3)
                     .map((todo: any) => (
                       <div 
@@ -676,9 +685,17 @@ export default function LinksGrid({
                         className={`flex items-center p-2 rounded-md ${todo.completed ? 'opacity-70' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          const updatedItems = item.todoItems.map((t: any) => 
-                            t.id === todo.id ? { ...t, completed: !t.completed } : t
-                          );
+                          const updatedItems = item.todoItems.map((t: any) => {
+                            if (t.id === todo.id) {
+                              const newCompleted = !t.completed;
+                              return {
+                                ...t,
+                                completed: newCompleted,
+                                completedAt: newCompleted ? Date.now() : undefined
+                              };
+                            }
+                            return t;
+                          });
                           handleTodosChange(updatedItems, item.id);
                         }}
                       >

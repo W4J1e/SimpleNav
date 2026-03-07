@@ -101,9 +101,17 @@ export default function TodoDialog({ isOpen, onClose, todos = [], onTodosChange 
   };
 
   const handleToggleComplete = (id: string) => {
-    const updatedTodos = todoItems.map(item => 
-      item.id === id ? { ...item, completed: !item.completed } : item
-    );
+    const updatedTodos = todoItems.map(item => {
+      if (item.id === id) {
+        const newCompleted = !item.completed;
+        return {
+          ...item,
+          completed: newCompleted,
+          completedAt: newCompleted ? Date.now() : undefined
+        };
+      }
+      return item;
+    });
     saveTodos(updatedTodos);
   };
 
@@ -165,10 +173,14 @@ export default function TodoDialog({ isOpen, onClose, todos = [], onTodosChange 
       );
     }
     
-    // 按完成状态和创建时间排序 - 未完成的排在前面，已完成的排在最后
+    // 按完成状态和完成时间排序 - 未完成的排在前面，已完成的排在最后
     return [...filtered].sort((a, b) => {
       if (a.completed !== b.completed) {
         return a.completed ? 1 : -1;
+      }
+      // 对于已完成的，按完成时间倒序；对于未完成的，按创建时间倒序
+      if (a.completed) {
+        return (b.completedAt || 0) - (a.completedAt || 0);
       }
       return b.createdAt - a.createdAt;
     });
