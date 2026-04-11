@@ -3,6 +3,7 @@ import { getUserFromRequest, refreshAccessToken, createJWTToken, setAuthCookie }
 
 // 强制动态渲染，避免静态生成错误
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // 从Microsoft Graph获取用户头像URL
 async function getUserPhoto(accessToken: string): Promise<string | undefined> {
