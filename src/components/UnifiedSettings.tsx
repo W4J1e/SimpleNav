@@ -94,10 +94,8 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
     // 立即执行初始认证检查
     initialCheckAuthStatus();
     
-    // 设置定期检查（每30秒），确保认证状态持续有效
-    const intervalId = setInterval(initialCheckAuthStatus, 30000);
-    
-    return () => clearInterval(intervalId);
+    // 移除定期检查，改为按需刷新
+    // 只在页面加载时检查一次，后续通过用户操作触发
   }, []); // 空依赖数组，只在组件挂载时运行
   
   // 设置面板打开时的认证检查
