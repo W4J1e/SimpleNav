@@ -4,12 +4,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const apiUrl = 'https://www.cikeee.com/api?app_key=pub_23020990025';
+    const apiUrl = 'https://www.cikeee.cc/api?app_key=pub_23020990025';
     
     // 服务器端请求，避免CORS问题
     const response = await fetch(apiUrl, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
+      cache: 'no-store'
     });
     const data = await response.json();
     
