@@ -518,7 +518,7 @@ export default function LinksGrid({
   const fetchHotBoardData = async () => {
     setIsLoadingHotBoard(true);
     try {
-      const response = await fetch('/api/zhihu-hot', {
+      const response = await fetch('https://uapis.cn/api/v1/misc/hotboard?type=zhihu', {
         cache: 'no-store'
       });
       if (response.ok) {
