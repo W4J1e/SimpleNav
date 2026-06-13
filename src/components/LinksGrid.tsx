@@ -813,20 +813,38 @@ export default function LinksGrid({
 
   return (
     <div className="w-full max-w-7xl flex flex-col flex-grow overflow-hidden">
-      <div id="category-tabs" className="flex overflow-x-auto pb-4 mb-6 gap-2 scrollbar-hide flex-shrink-0">
-
-        {categories.map(category => (
-          <button 
-            key={category}
-            className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all ${selectedCategory === category ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20 text-white dark:bg-gray-800/80 dark:hover:bg-gray-700/80 dark:text-white'}`}
-            onClick={() => {
-              const event = new CustomEvent('categoryChange', { detail: category });
-              window.dispatchEvent(event);
-            }}
+      <div className="flex items-center pb-4 mb-6 gap-2 flex-shrink-0 overflow-hidden">
+        {/* 分类按钮 - 悬停向右展开 */}
+        <div className="flex items-center gap-2 group">
+          <button
+            className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
+              selectedCategory !== 'all' ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20 text-white dark:bg-gray-800/80 dark:hover:bg-gray-700/80 dark:text-white'
+            }`}
           >
-            {category === 'all' ? '全部' : category}
+            <i className="fas fa-layer-group text-xs"></i>
+            <span>{selectedCategory === 'all' ? '分类' : selectedCategory}</span>
+            <i className="fas fa-chevron-right text-[10px] transition-transform duration-300 group-hover:rotate-90"></i>
           </button>
-        ))}
+          {/* 悬停时向右展开的分类标签 */}
+          <div className="flex items-center gap-2 max-w-0 group-hover:max-w-[800px] opacity-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden">
+            {categories.map(category => (
+              <button
+                key={category}
+                className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all shrink-0 ${
+                  selectedCategory === category
+                    ? 'bg-primary text-white'
+                    : 'bg-white/10 hover:bg-white/20 text-white dark:bg-gray-800/80 dark:hover:bg-gray-700/80 dark:text-white'
+                }`}
+                onClick={() => {
+                  const event = new CustomEvent('categoryChange', { detail: category });
+                  window.dispatchEvent(event);
+                }}
+              >
+                {category === 'all' ? '全部' : category}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* 链接网格 - 确保有足够的空间显示所有卡片 */}

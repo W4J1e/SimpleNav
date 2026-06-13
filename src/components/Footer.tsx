@@ -1,18 +1,18 @@
 'use client';
 
 interface FooterProps {
-  onToggleUnifiedSettings: () => void;
   onToggleAbout: () => void;
-  onToggleHelp: () => void;
+  onToggleTheme: () => void;
+  darkMode: boolean;
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
 }
 
 export default function Footer({
-  onToggleUnifiedSettings,
   onToggleAbout,
-  onToggleHelp,
+  onToggleTheme,
+  darkMode,
   currentPage,
   totalPages,
   onPageChange
@@ -20,11 +20,6 @@ export default function Footer({
   const handleAboutClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onToggleAbout();
-  };
-
-  const handleHelpClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    onToggleHelp();
   };
 
   return (
@@ -64,24 +59,20 @@ export default function Footer({
             </div>
           ) : null}
         </div>
-        <div className="w-1/3 flex justify-end gap-4">
+        <div className="w-1/3 flex justify-end items-center gap-4">
+          <button
+            onClick={onToggleTheme}
+            className="p-2 rounded-full hover:bg-white/10 transition-all"
+            title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
+          >
+            <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`}></i>
+          </button>
           <button
             onClick={handleAboutClick}
-            className="hover:text-white transition-all text-sm bg-transparent border-none cursor-pointer"
+            className="p-2 rounded-full hover:bg-white/10 transition-all"
+            title="关于"
           >
-            关于
-          </button>
-          <button
-            onClick={onToggleUnifiedSettings}
-            className="hover:text-white transition-all text-sm bg-transparent border-none cursor-pointer"
-          >
-            设置
-          </button>
-          <button
-            onClick={handleHelpClick}
-            className="hover:text-white transition-all text-sm bg-transparent border-none cursor-pointer"
-          >
-            帮助
+            <i className="fas fa-circle-info"></i>
           </button>
         </div>
       </div>
