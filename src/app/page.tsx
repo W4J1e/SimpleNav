@@ -8,11 +8,16 @@ import LinkForm from '@/components/LinkForm';
 import Footer from '@/components/Footer';
 import UnifiedSettings from '@/components/UnifiedSettings';
 import AboutDialog from '@/components/AboutDialog';
-import HelpDialog from '@/components/HelpDialog';
 import ZhihuHotBoardDialog from '@/components/ZhihuHotBoardDialog';
 import { Link, Settings } from '@/types';
 import { getLinks, saveLinks, getSettings, saveSettings, useOneDriveStorage, setUseOneDriveStorage, syncFromOneDrive, syncData, defaultSettings } from '@/lib/storage';
 import { oneDriveStorage } from '@/lib/onedrive-storage';
+
+interface UserInfo {
+  displayName: string;
+  email: string;
+  photo?: string;
+}
 
 import { applyAppBackground } from '@/lib/utils';
 
@@ -20,6 +25,7 @@ export default function HomePage() {
   const [links, setLinks] = useState<Link[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   // 使用useRef追踪是否已初始化，避免重复同步
   const wasInitializedRef = useRef(false);
 
@@ -28,7 +34,6 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isUnifiedSettingsOpen, setIsUnifiedSettingsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isZhihuHotBoardOpen, setIsZhihuHotBoardOpen] = useState(false);
   const [showAuthExpiredToast, setShowAuthExpiredToast] = useState(false);
   const [paginationState, setPaginationState] = useState<{ currentPage: number; totalPages: number }>({
@@ -75,6 +80,9 @@ export default function HomePage() {
           // 认证有效，更新token和状态
           oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
           setIsAuthenticated(true);
+          if (data.user) {
+            setUserInfo(data.user);
+          }
           
           // 无论是否启用OneDrive存储，只要认证成功，就执行双向同步
           // 但不等待同步完成，在后台进行
@@ -96,6 +104,7 @@ export default function HomePage() {
         } else {
           // 认证无效或已过期，清除状态
           oneDriveStorage.clearUserToken();
+          setUserInfo(null);
           
           // 如果之前是认证状态，或者首次打开网页没有登录，显示提示
           if (wasAuthenticated || !wasInitializedRef.current) {
@@ -160,6 +169,9 @@ export default function HomePage() {
             if (data.authenticated && data.accessToken && data.refreshToken) {
               oneDriveStorage.setUserToken(data.accessToken, data.refreshToken);
               setIsAuthenticated(true);
+              if (data.user) {
+                setUserInfo(data.user);
+              }
             }
           }
         } catch (error) {
@@ -329,11 +341,10 @@ export default function HomePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <Header 
+      <Header
         onToggleAddLink={toggleLinkForm}
-        onToggleTheme={toggleTheme}
         onToggleUnifiedSettings={toggleUnifiedSettings}
-        darkMode={settings.darkMode}
+        userInfo={userInfo}
       />
       
       <main className="flex-grow p-4 md:p-12 pb-2 flex flex-col items-center overflow-hidden">
@@ -361,9 +372,9 @@ export default function HomePage() {
       </main>
       
       <Footer
-        onToggleUnifiedSettings={toggleUnifiedSettings}
         onToggleAbout={toggleAbout}
-        onToggleHelp={() => setIsHelpOpen(true)}
+        onToggleTheme={toggleTheme}
+        darkMode={settings.darkMode}
         currentPage={paginationState.currentPage}
         totalPages={paginationState.totalPages}
         onPageChange={(page) => {
@@ -394,12 +405,6 @@ export default function HomePage() {
       <AboutDialog 
         isOpen={isAboutOpen}
         onClose={toggleAbout}
-      />
-      
-      {/* 帮助对话框 */}
-      <HelpDialog 
-        isOpen={isHelpOpen}
-        onClose={() => setIsHelpOpen(false)}
       />
       
       {/* 知乎热榜对话框 */}
