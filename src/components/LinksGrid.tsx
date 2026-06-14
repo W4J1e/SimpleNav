@@ -784,24 +784,20 @@ export default function LinksGrid({
                     </div>
               </div>
             ) : (
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-4 w-full">
-                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
-                    {item.useFavicon ? (
-                      <div className="relative w-10 h-10 rounded">
-                        <img 
-                          src={getFaviconUrl(item.url)} 
-                          alt={`${item.name}图标`} 
-                          className="w-full h-full rounded" 
-                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
-                        />
-                      </div>
-                    ) : (
-                      <i className={`${item.icon || 'fas fa-link'} text-3xl`}></i>
-                    )}
-                  </div>
-                  <span className="font-medium truncate text-base">{item.name}</span>
+              <div className="flex flex-col items-center justify-center gap-2 py-1">
+                <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-white/15">
+                  {item.useFavicon ? (
+                    <img 
+                      src={getFaviconUrl(item.url)} 
+                      alt={`${item.name}图标`} 
+                      className="w-8 h-8 rounded-full object-cover" 
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
+                    />
+                  ) : (
+                    <i className={`${item.icon || 'fas fa-link'} text-2xl`}></i>
+                  )}
                 </div>
+                <span className="font-medium truncate text-sm text-center w-full">{item.name}</span>
               </div>
             )}
             {!item.isHotBoard && <a href={item.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>}
