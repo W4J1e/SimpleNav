@@ -647,7 +647,7 @@ export default function LinksGrid({
               className="flex items-center justify-center h-full cursor-pointer group transition-opacity hover:opacity-80"
               onClick={onAddLink}
             >
-              <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 border-dashed border-white/20 group-hover:border-white/40 transition-colors">
+              <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 border-dashed border-white/30 group-hover:border-white/50 transition-colors">
                 <i className="fas fa-plus text-2xl text-white/40 group-hover:text-white/70 transition-colors"></i>
               </div>
             </div>
@@ -802,12 +802,12 @@ export default function LinksGrid({
             onDragLeave={handleDragLeave}
           >
             <div className="flex flex-col items-center justify-center gap-2">
-              <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
+              <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center">
                 {item.useFavicon ? (
                   <img 
                     src={getFaviconUrl(item.url)} 
                     alt={`${item.name}图标`} 
-                    className="w-14 h-14 rounded-full object-cover" 
+                    className="w-14 h-14 object-contain" 
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
                   />
                 ) : (
