@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { DEFAULT_BG_IMAGE, BING_IMAGE_SOURCES } from '@/lib/utils';
 
+export const runtime = 'nodejs';
+
 export async function GET() {
   try {
     // 尝试从多个源获取Bing图片

@@ -637,10 +637,10 @@ export default function LinksGrid({
         return (
           <div key="add-card" className={layout === 'masonry' ? 'masonry-item' : ''}>
             <div 
-              className="bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card cursor-pointer flex items-center justify-center h-full min-h-[80px] dark:bg-gray-800/80 dark:hover:bg-gray-700/80"
+              className="flex items-center justify-center h-full min-h-[80px] cursor-pointer group transition-opacity hover:opacity-80"
               onClick={onAddLink}
             >
-              <i className="fas fa-plus-circle text-2xl opacity-60 group-hover:opacity-100 transition-opacity"></i>
+              <i className="fas fa-plus-circle text-3xl text-white/40 group-hover:text-white/70 transition-colors"></i>
             </div>
           </div>
         );
@@ -743,8 +743,9 @@ export default function LinksGrid({
           key={item.id} 
           className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2' : ''}`}
         >
+          {item.isHotBoard ? (
           <div 
-            className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} ${item.isHotBoard ? 'h-full' : 'min-h-[80px]'}`}
+            className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} h-full`}
             onContextMenu={(e) => handleContextMenu(e, item)}
             draggable="true"
             onDragStart={(e) => handleDragStart(e, item)}
@@ -752,60 +753,63 @@ export default function LinksGrid({
             onDragEnd={handleDragEnd}
             onDragLeave={handleDragLeave}
             onClick={(e) => {
-              if (item.isHotBoard && onHotBoardClick) {
-                e.preventDefault();
-                onHotBoardClick();
-              }
+              e.preventDefault();
+              onHotBoardClick?.();
             }}
           >
-            {item.isHotBoard ? (
-              <div className="flex flex-col max-h-[155px]">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
-                    <div className="w-7 h-7 flex-shrink-0 flex items-center justify-center">
-                      <i className="fas fa-fire text-base text-orange-500"></i>
-                    </div>
-                    <span className="font-medium truncate text-sm">知乎热榜</span>
+            <div className="flex flex-col max-h-[155px]">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
+                  <div className="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                    <i className="fas fa-fire text-base text-orange-500"></i>
                   </div>
+                  <span className="font-medium truncate text-sm">知乎热榜</span>
                 </div>
-                    <div className="space-y-1.5 mt-1.5 flex-grow">
-                      {isLoadingHotBoard ? (
-                        <div className="text-center py-1.5"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
-                      ) : hotBoardData.length === 0 ? (
-                        <div className="text-xs text-gray-300 text-center py-1.5">暂无数据</div>
-                      ) : (
-                        hotBoardData.map((h, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <span className="text-xs font-medium text-white w-4 flex-shrink-0">{index + 1}</span>
-                            <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow leading-tight">{h.title}</a>
-                          </div>
-                        ))
-                      )}
-                    </div>
               </div>
-            ) : (
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-4 w-full">
-                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
-                    {item.useFavicon ? (
-                      <div className="relative w-10 h-10 rounded">
-                        <img 
-                          src={getFaviconUrl(item.url)} 
-                          alt={`${item.name}图标`} 
-                          className="w-full h-full rounded" 
-                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
-                        />
-                      </div>
+                  <div className="space-y-1.5 mt-1.5 flex-grow">
+                    {isLoadingHotBoard ? (
+                      <div className="text-center py-1.5"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
+                    ) : hotBoardData.length === 0 ? (
+                      <div className="text-xs text-gray-300 text-center py-1.5">暂无数据</div>
                     ) : (
-                      <i className={`${item.icon || 'fas fa-link'} text-3xl`}></i>
+                      hotBoardData.map((h, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <span className="text-xs font-medium text-white w-4 flex-shrink-0">{index + 1}</span>
+                          <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow leading-tight">{h.title}</a>
+                        </div>
+                      ))
                     )}
                   </div>
-                  <span className="font-medium truncate text-base">{item.name}</span>
-                </div>
-              </div>
-            )}
-            {!item.isHotBoard && <a href={item.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 w-full h-full"></a>}
+            </div>
           </div>
+          ) : (
+          <a 
+            href={item.url} target="_blank" rel="noopener noreferrer"
+            className={`relative group transition-opacity hover:opacity-80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400 rounded-full' : ''}`}
+            onContextMenu={(e) => handleContextMenu(e, item)}
+            draggable="true"
+            onDragStart={(e) => handleDragStart(e, item)}
+            onDragOver={(e) => handleDragOver(e, item)}
+            onDragEnd={handleDragEnd}
+            onDragLeave={handleDragLeave}
+          >
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-white/15">
+                {item.useFavicon ? (
+                  <img 
+                    src={getFaviconUrl(item.url)} 
+                    alt={`${item.name}图标`} 
+                    className="w-8 h-8 rounded-full object-cover" 
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
+                  />
+                ) : (
+                  <i className={`${item.icon || 'fas fa-link'} text-2xl text-white`}></i>
+                )}
+              </div>
+              <span className="font-medium truncate text-sm text-white/90 text-center w-full">{item.name}</span>
+            </div>
+          </a>
+          )}
         </div>
       );
     });

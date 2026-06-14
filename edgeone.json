@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/zhihu-hot",
+      "destination": "https://uapis.cn/api/v1/misc/hotboard?type=zhihu"
+    }
+  ]
+}
