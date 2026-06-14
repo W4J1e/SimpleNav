@@ -2,11 +2,11 @@ import { Link, Settings } from '@/types';
 
 // 默认设置
 export const defaultSettings: Settings = {
-  bgType: 'bing',
+  bgType: 'gradient',
   bgColor: '#1a1a2e',
   bgImageUrl: '',
   bgUploadUrl: '',
-  gradientPreset: 'blue-purple',
+  gradientPreset: 'purple-sunset',
   darkMode: false,
   showClock: true,
   layout: 'grid',

@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       if (!hasSettings) {
         const defaultSettings = {
           bgType: 'gradient',
-          gradientPreset: 'blue',
+          gradientPreset: 'purple-sunset',
           darkMode: false,
           showClock: true,
           layout: 'grid',

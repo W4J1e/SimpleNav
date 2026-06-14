@@ -16,14 +16,14 @@ interface HeaderProps {
 
 export default function Header({ onToggleAddLink, onToggleUnifiedSettings, userInfo }: HeaderProps) {
   return (
-    <header className="bg-transparent text-white w-full py-4 px-6 md:px-12 flex justify-between items-center transition-all duration-300 z-50">
+    <header className="bg-transparent text-gray-700 w-full py-4 px-6 md:px-12 flex justify-between items-center transition-all duration-300 z-50">
       <div className="flex items-center">
         <Weather />
       </div>
       <div className="flex items-center">
         <button
           onClick={onToggleUnifiedSettings}
-          className="p-1 rounded-full hover:bg-white/10 transition-all"
+          className="p-1 rounded-full hover:bg-white/40 transition-all"
           title="设置"
         >
           {userInfo?.photo ? (
@@ -33,7 +33,7 @@ export default function Header({ onToggleAddLink, onToggleUnifiedSettings, userI
               className="w-8 h-8 rounded-full object-cover ring-2 ring-white/20 hover:ring-white/40 transition-all"
             />
           ) : (
-            <i className="fas fa-user-circle text-2xl text-white/70 hover:text-white transition-all"></i>
+            <i className="fas fa-user-circle text-2xl text-white hover:text-white/80 transition-all"></i>
           )}
         </button>
       </div>

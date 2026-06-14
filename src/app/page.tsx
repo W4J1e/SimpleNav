@@ -9,6 +9,7 @@ import Footer from '@/components/Footer';
 import UnifiedSettings from '@/components/UnifiedSettings';
 import AboutDialog from '@/components/AboutDialog';
 import ZhihuHotBoardDialog from '@/components/ZhihuHotBoardDialog';
+import DynamicBackground from '@/components/DynamicBackground';
 import { Link, Settings } from '@/types';
 import { getLinks, saveLinks, getSettings, saveSettings, useOneDriveStorage, setUseOneDriveStorage, syncFromOneDrive, syncData, defaultSettings } from '@/lib/storage';
 import { oneDriveStorage } from '@/lib/onedrive-storage';
@@ -341,6 +342,11 @@ export default function HomePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
+      {/* 动态渐变背景 */}
+      {settings.bgType === 'gradient' && (
+        <DynamicBackground preset={settings.gradientPreset} darkMode={settings.darkMode} />
+      )}
+
       <Header
         onToggleAddLink={toggleLinkForm}
         onToggleUnifiedSettings={toggleUnifiedSettings}

@@ -78,15 +78,16 @@ export const getIconFromUrl = (url: string): string => {
   }
 };
 
-// 获取渐变背景
+// 获取渐变背景 - 已迁移至 SVG 渐变方案，此函数保留兼容
 export const getGradientBackground = (preset: string): string => {
-  const gradients = {
-    'blue-purple': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    'green-blue': 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
-    'orange-red': 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
-    'pink-purple': 'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)'
+  const gradients: Record<string, string> = {
+    'purple-sunset': 'linear-gradient(135deg, #E8DFF5 0%, #FFE4D1 50%, #FCE4EC 100%)',
+    'ocean-depth': 'linear-gradient(135deg, #D1E4FF 0%, #C8DDF5 50%, #B0C8E0 100%)',
+    'aurora': 'linear-gradient(135deg, #D0F0E8 0%, #DDE4F5 50%, #C8E8D0 100%)',
+    'rose-dawn': 'linear-gradient(135deg, #FBE4D5 0%, #F5DDF0 50%, #FDF0D5 100%)',
+    'deep-space': 'linear-gradient(135deg, #E0D5F5 0%, #D5D0F0 50%, #C0D0F5 100%)',
   };
-  return gradients[preset as keyof typeof gradients] || gradients['blue-purple'];
+  return gradients[preset] || gradients['purple-sunset'];
 };
 
 // 预加载图片
@@ -179,9 +180,14 @@ export const applyAppBackground = (settings: Settings) => {
   } 
   
   if (settings.bgType === 'gradient') {
-    setStyles(getGradientBackground(settings.gradientPreset));
+    // 渐变背景由 DynamicBackground 组件渲染，这里只清除旧背景
+    setStyles('none', 'transparent');
+    body.classList.add('bg-gradient');
     return;
   }
+
+  // 非渐变背景时移除标记类
+  body.classList.remove('bg-gradient');
 
   // 2. 异步加载前，先确保有一个基础背景（如果是首次进入）
   if (!body.style.backgroundImage || body.style.backgroundImage === 'none') {

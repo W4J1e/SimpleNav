@@ -113,7 +113,7 @@ export default function Weather() {
 
   if (error || !weatherData) {
     return (
-      <div className="flex items-center gap-2 text-white text-sm">
+      <div className="flex items-center gap-2 text-gray-700 text-sm">
           <i className="fas fa-cloud"></i>
           <span>天气不可用</span>
         </div>
@@ -140,62 +140,62 @@ export default function Weather() {
       
       {/* 悬停时显示的详情卡片 */}
       {isHovered && (
-        <div className="absolute top-full left-0 mt-2 bg-black/70 backdrop-blur-md rounded-lg p-4 shadow-lg min-w-[280px] z-50">
+        <div className="absolute top-full left-0 mt-2 bg-white/70 backdrop-blur-xl rounded-lg p-4 shadow-lg min-w-[280px] z-50 text-gray-700 border border-white/40">
           {/* 城市和日期 */}
-          <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/20">
+          <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
             <div className="font-medium">{weatherData.city}</div>
-            <div className="text-xs opacity-80">{todayWeather.date}</div>
+            <div className="text-xs text-gray-500">{todayWeather.date}</div>
           </div>
           
           {/* 今天的详细天气信息 */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <i className="fas fa-temperature-high text-orange-400"></i>
+              <i className="fas fa-temperature-high text-orange-500"></i>
               <div>
-                <div className="text-xs opacity-80">最高温度</div>
+                <div className="text-xs text-gray-500">最高温度</div>
                 <div>{todayWeather.high}°C</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <i className="fas fa-temperature-low text-blue-400"></i>
+              <i className="fas fa-temperature-low text-blue-500"></i>
               <div>
-                <div className="text-xs opacity-80">最低温度</div>
+                <div className="text-xs text-gray-500">最低温度</div>
                 <div>{todayWeather.low}°C</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <i className="fas fa-tint text-blue-300"></i>
+              <i className="fas fa-tint text-blue-400"></i>
               <div>
-                <div className="text-xs opacity-80">湿度</div>
+                <div className="text-xs text-gray-500">湿度</div>
                 <div>{todayWeather.humidity}%</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <i className="fas fa-wind text-gray-300"></i>
+              <i className="fas fa-wind text-gray-400"></i>
               <div>
-                <div className="text-xs opacity-80">风速</div>
+                <div className="text-xs text-gray-500">风速</div>
                 <div>{todayWeather.windSpeed} km/h</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <i className="fas fa-compass text-yellow-400"></i>
+              <i className="fas fa-compass text-yellow-500"></i>
               <div>
-                <div className="text-xs opacity-80">风向</div>
+                <div className="text-xs text-gray-500">风向</div>
                 <div>{todayWeather.windDirection}</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <i className="fas fa-cloud-rain text-gray-300"></i>
+              <i className="fas fa-cloud-rain text-gray-400"></i>
               <div>
-                <div className="text-xs opacity-80">降水概率</div>
+                <div className="text-xs text-gray-500">降水概率</div>
                 <div>{todayWeather.precip}</div>
               </div>
             </div>
           </div>
           
           {/* 未来2天的天气预报 */}
-          <div className="border-t border-white/20 pt-3">
-            <div className="text-xs font-medium mb-2 opacity-80">未来2天预报</div>
+          <div className="border-t border-gray-200 pt-3">
+            <div className="text-xs font-medium mb-2 text-gray-500">未来2天预报</div>
             <div className="space-y-2">
               {weatherData.daily.slice(1, 3).map((day, index) => (
                 <div key={index} className="flex justify-between items-center">
@@ -205,7 +205,7 @@ export default function Weather() {
                     <div className="text-xs truncate max-w-[60px]">{day.textDay}</div>
                   </div>
                   <div className="text-xs">
-                    <span className="text-gray-300">{day.low}°</span> / <span>{day.high}°</span>
+                    <span className="text-gray-400">{day.low}°</span> / <span>{day.high}°</span>
                   </div>
                 </div>
               ))}
@@ -213,9 +213,9 @@ export default function Weather() {
           </div>
           
           {/* 数据来源链接 */}
-          <div className="mt-3 pt-3 border-t border-white/20">
-            <div className="text-xs opacity-70 text-center">
-              数据来源：<a href="https://www.seniverse.com/?from=a.hin.cool" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">心知天气</a>
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <div className="text-xs text-gray-500 text-center">
+              数据来源：<a href="https://www.seniverse.com/?from=a.hin.cool" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors">心知天气</a>
             </div>
           </div>
         </div>

@@ -23,7 +23,7 @@ export default function Footer({
   };
 
   return (
-    <footer className="bg-transparent text-white/70 py-3 px-6 md:px-12">
+    <footer className="bg-transparent text-white py-3 px-6 md:px-12">
       <div className="flex justify-between items-center w-full">
         <div className="w-1/3"></div>
         <div className="flex-1 flex justify-center items-center">
@@ -49,8 +49,8 @@ export default function Footer({
                     onClick={() => onPageChange(pageNum)}
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${
                       currentPage === pageNum
-                        ? 'bg-white scale-125'
-                        : 'bg-white/30 hover:bg-white/50'
+                        ? 'bg-gray-600 scale-125'
+                        : 'bg-gray-300 hover:bg-gray-400'
                     }`}
                     title={`第 ${pageNum} 页`}
                   />
@@ -62,14 +62,14 @@ export default function Footer({
         <div className="w-1/3 flex justify-end items-center gap-4">
           <button
             onClick={onToggleTheme}
-            className="p-2 rounded-full hover:bg-white/10 transition-all"
+            className="p-2 rounded-full hover:bg-white/40 transition-all text-white hover:text-white/80"
             title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
           >
             <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`}></i>
           </button>
           <button
             onClick={handleAboutClick}
-            className="p-2 rounded-full hover:bg-white/10 transition-all"
+            className="p-2 rounded-full hover:bg-white/40 transition-all text-white hover:text-white/80"
             title="关于"
           >
             <i className="fas fa-circle-info"></i>

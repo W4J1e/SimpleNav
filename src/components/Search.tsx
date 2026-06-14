@@ -77,8 +77,8 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
       <div
         ref={containerRef}
         onMouseEnter={() => setIsExpanded(true)}
-        className={`relative flex items-center bg-white/10 backdrop-blur-md border border-white/20 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] rounded-full overflow-hidden ${
-          isExpanded ? 'w-full h-12 shadow-lg shadow-black/20' : 'w-12 h-12 hover:bg-white/15 cursor-pointer'
+        className={`relative flex items-center bg-white/60 backdrop-blur-xl border border-white/40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] rounded-full overflow-hidden ${
+          isExpanded ? 'w-full h-12 shadow-lg shadow-black/10' : 'w-12 h-12 hover:bg-white/70 cursor-pointer'
         }`}
       >
         {/* 收起状态：放大镜图标 */}
@@ -87,7 +87,7 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
             isExpanded ? 'w-0 h-0 opacity-0 overflow-hidden' : 'w-12 h-12'
           }`}
         >
-          <i className="fas fa-search text-white/80 text-base"></i>
+          <i className="fas fa-search text-gray-600 text-base"></i>
         </div>
 
         {/* 展开内容 */}
@@ -97,7 +97,7 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
           {/* 搜索引擎切换按钮 */}
           <button
             onClick={handleEngineChange}
-            className="shrink-0 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white/80 hover:text-white font-bold text-sm transition-all rounded-l-full border-r border-white/10"
+            className="shrink-0 w-12 h-12 flex items-center justify-center bg-white/30 hover:bg-white/50 text-gray-500 hover:text-gray-700 font-bold text-sm transition-all rounded-l-full border-r border-white/20"
             title={`当前：${searchEngine === 'bing' ? '必应' : '谷歌'}，点击切换`}
           >
             {searchEngine === 'bing' ? 'B' : 'G'}
@@ -110,13 +110,13 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 min-w-0 h-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm px-3"
+            className="flex-1 min-w-0 h-full bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none text-sm px-3"
           />
 
           {/* 搜索按钮 */}
           <button 
             onClick={performSearch}
-            className="shrink-0 w-12 h-12 flex items-center justify-center text-white/60 hover:text-white transition-all"
+            className="shrink-0 w-12 h-12 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all"
           >
             <i className="fas fa-search text-sm"></i>
           </button>

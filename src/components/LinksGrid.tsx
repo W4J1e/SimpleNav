@@ -35,7 +35,8 @@ const MovieCalendarCard = ({
   handleDragOver, 
   handleDragEnd, 
   handleDragLeave, 
-  setIsMovieCalendarDialogOpen 
+  setIsMovieCalendarDialogOpen,
+  colSpan = 2
 }: any) => {
   const [currentDate, setCurrentDate] = useState({ day: 0, month: '', weekday: '' });
 
@@ -53,9 +54,9 @@ const MovieCalendarCard = ({
   const isOver = draggedOverLinkId === movieLink.id;
 
   return (
-    <div key={movieLink.id} className="col-span-2 row-span-2 h-full">
+    <div key={movieLink.id} className="row-span-2 h-full" style={{ gridColumn: `span ${colSpan}` }}>
       <div 
-        className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full overflow-hidden ${isDragging ? 'opacity-50 transform scale-105' : ''} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
+        className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-gray-800 dark:text-white hover:bg-white/20 transition-all group link-card relative shadow-lg shadow-black/5 h-3/4 overflow-hidden cursor-pointer ${isDragging ? 'opacity-50 transform scale-105' : ''} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
         draggable="true"
         onDragStart={(e) => handleDragStart(e, movieLink)}
         onDragOver={(e) => handleDragOver(e, movieLink)}
@@ -65,31 +66,31 @@ const MovieCalendarCard = ({
       >
         {isLoading || !movieData ? (
           <div className="flex items-center justify-center h-full">
-            <i className="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
+            <i className="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
           </div>
         ) : (
           <>
-            <div className="absolute top-0 left-0 w-32 h-full bg-cover bg-center" style={{ backgroundImage: `url(${movieData.mov_pic})` }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/50"></div>
+            <div className="absolute top-0 left-0 w-28 h-full bg-cover bg-center" style={{ backgroundImage: `url(${movieData.mov_pic})` }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/40"></div>
             </div>
-            <div className="absolute top-4 right-4 backdrop-blur-sm rounded-lg p-1 text-center">
-              <div className="text-base font-bold">{currentDate.day}</div>
-              <div className="text-[10px] opacity-80">{currentDate.month}/{currentDate.weekday}</div>
+            <div className="absolute top-3 right-3 backdrop-blur-sm bg-white/20 dark:bg-white/10 rounded-lg px-1.5 py-0.5 text-center">
+              <div className="text-sm font-bold text-gray-900 dark:text-white">{currentDate.day}</div>
+              <div className="text-[10px] text-gray-600 dark:text-gray-300">{currentDate.month}/{currentDate.weekday}</div>
             </div>
-            <div className="ml-36 h-full flex flex-col justify-between">
+            <div className="ml-32 h-full flex flex-col justify-between">
               <div className="overflow-hidden">
-                <h3 className="text-lg font-bold mb-1 truncate">{movieData.mov_title}</h3>
+                <h3 className="text-base font-bold mb-1 truncate text-gray-900 dark:text-white">{movieData.mov_title}</h3>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-green-400 text-sm">豆 {movieData.mov_rating}</span>
-                  <span className="text-xs opacity-80 truncate">{movieData.mov_year} {movieData.mov_area}</span>
+                  <span className="text-green-600 dark:text-green-400 text-sm">豆 {movieData.mov_rating}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{movieData.mov_year} {movieData.mov_area}</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mb-2">
                   {movieData.mov_type.slice(0, 3).map((type: string, index: number) => (
-                    <span key={index} className="text-xs bg-white/20 rounded-full px-2 py-0.5 truncate max-w-[60px]">{type}</span>
+                    <span key={index} className="text-xs bg-white/20 dark:bg-white/10 rounded-full px-2 py-0.5 truncate max-w-[60px]">{type}</span>
                   ))}
                 </div>
               </div>
-              <div className="mt-1 text-sm italic opacity-70 line-clamp-3 overflow-hidden">
+              <div className="mt-1 text-sm italic text-gray-600 dark:text-gray-300 opacity-70 line-clamp-3 overflow-hidden">
                 "{movieData.mov_text}"
               </div>
             </div>
@@ -151,6 +152,10 @@ export default function LinksGrid({
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
 
+  // 小组件卡片的列跨度：电影日历占3个图标位置，待办/热榜各占2个图标位置
+  const movieCalendarSpan = 3;
+  const widgetSpan = 2;
+
 
   const safeLinks = Array.isArray(links) ? links : [];
 
@@ -199,8 +204,8 @@ export default function LinksGrid({
       let w = 1;
       let h = 1;
       // 定义不同类型卡片的占用尺寸
-      if (item.isMovieCalendar) { w = 2; h = 2; }
-      else if (item.isTodo || item.isHotBoard) { w = 1; h = 2; }
+      if (item.isMovieCalendar) { w = movieCalendarSpan; h = 2; }
+      else if (item.isTodo || item.isHotBoard) { w = widgetSpan; h = 2; }
       
       // 适配当前列数
       if (w > columns) w = columns;
@@ -249,7 +254,7 @@ export default function LinksGrid({
       }
     });
     return pagesResult;
-  }, [links, selectedCategory, layout, columns, rowsPerPage, enabledComponents]);
+  }, [links, selectedCategory, layout, columns, rowsPerPage, enabledComponents, movieCalendarSpan, widgetSpan]);
 
 
   const totalPages = pages.length;
@@ -260,11 +265,13 @@ export default function LinksGrid({
       const width = window.innerWidth;
       const height = window.innerHeight;
 
-      // 更新列数
-      if (width >= 1024) setColumns(6);
-      else if (width >= 768) setColumns(4);
-      else if (width >= 640) setColumns(3);
-      else setColumns(2);
+      // 更新列数 - 根据容器宽度自动计算，每个图标卡片目标宽度约110px
+      const container = document.getElementById('links-grid-container');
+      const containerWidth = container ? container.clientWidth : (width - (width >= 768 ? 48 : 16));
+      const iconTargetWidth = 110; // px
+      const gapX = width >= 768 ? 12 : 8; // px
+      const calculatedColumns = Math.max(3, Math.floor((containerWidth + gapX) / (iconTargetWidth + gapX)));
+      setColumns(calculatedColumns);
 
       // 更新行数 - 根据实际可用空间动态计算
       // 减去头部、搜索栏、分类标签、页脚等固定元素的高度
@@ -287,8 +294,8 @@ export default function LinksGrid({
       const availableHeight = height - headerHeight - mainPadding - searchHeight - tabsHeight - mainMarginTop - footerHeight - extraMargin;
 
       // 计算每行高度（卡片最小高度 + 间距）
-      // 中等屏幕卡片最小80px，间距16px；小屏幕间距12px
-      const cardMinHeight = 80;
+      // 图标圆圈 w-20 h-20 + 文字 + 间距，实际约 110px
+      const cardMinHeight = 110;
       const gapY = width >= 768 ? 16 : 12;
       const rowHeight = cardMinHeight + gapY;
 
@@ -523,7 +530,7 @@ export default function LinksGrid({
       });
       if (response.ok) {
         const data = await response.json();
-        const formattedData = data.list.slice(0, 5).map((item: any) => ({
+        const formattedData = data.list.slice(0, 6).map((item: any) => ({
           title: item.title,
           hot: item.hot_value,
           url: item.url
@@ -621,7 +628,7 @@ export default function LinksGrid({
 
   const getGridClasses = () => {
     if (layout === 'grid' || layout === 'list') {
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 gap-y-3 md:gap-4 md:gap-y-4 content-start items-start';
+      return 'grid gap-x-2 gap-y-3 md:gap-x-3 md:gap-y-4 content-start items-start';
     } else if (layout === 'masonry') {
       return 'masonry-grid';
     }
@@ -637,10 +644,12 @@ export default function LinksGrid({
         return (
           <div key="add-card" className={layout === 'masonry' ? 'masonry-item' : ''}>
             <div 
-              className="flex items-center justify-center h-full min-h-[80px] cursor-pointer group transition-opacity hover:opacity-80"
+              className="flex items-center justify-center h-full cursor-pointer group transition-opacity hover:opacity-80"
               onClick={onAddLink}
             >
-              <i className="fas fa-plus-circle text-3xl text-white/40 group-hover:text-white/70 transition-colors"></i>
+              <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 border-dashed border-white/20 group-hover:border-white/40 transition-colors">
+                <i className="fas fa-plus text-2xl text-white/40 group-hover:text-white/70 transition-colors"></i>
+              </div>
             </div>
           </div>
         );
@@ -649,9 +658,9 @@ export default function LinksGrid({
       if (item.isTodo) {
         // 渲染待办事项卡片
         return (
-          <div key={item.id} className="row-span-2">
+          <div key={item.id} className="row-span-2 h-full" style={{ gridColumn: `span ${widgetSpan}` }}>
             <div 
-              className={`bg-white/10 backdrop-blur-md rounded-xl p-3 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 h-full ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
+              className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-gray-800 dark:text-white hover:bg-white/20 transition-all group link-card relative shadow-lg shadow-black/5 h-3/4 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
               draggable="true"
               onDragStart={(e) => handleDragStart(e, item)}
               onDragOver={(e) => handleDragOver(e, item)}
@@ -659,30 +668,29 @@ export default function LinksGrid({
               onDragLeave={handleDragLeave}
               onClick={() => handleTodoDialogOpen(item)}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded-full">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs bg-white/20 dark:bg-white/10 text-gray-700 dark:text-gray-200 px-1.5 py-0.5 rounded-full">
                   {(item.todoItems || []).filter((t: any) => !t.completed).length}
                 </span>
-                <h3 className="font-medium truncate text-sm text-white">待办事项</h3>
+                <h3 className="font-medium truncate text-sm text-gray-800 dark:text-white">待办事项</h3>
               </div>
-              <div className="space-y-2 flex-grow overflow-y-auto">
+              <div className="space-y-1 flex-grow overflow-y-auto">
                 {(item.todoItems || []).length > 0 ? (
                   [...(item.todoItems || [])]
                     .sort((a: any, b: any) => {
                       if (a.completed !== b.completed) {
                         return a.completed ? 1 : -1;
                       }
-                      // 对于已完成的，按完成时间倒序；对于未完成的，按创建时间倒序
                       if (a.completed) {
                         return (b.completedAt || 0) - (a.completedAt || 0);
                       }
                       return b.createdAt - a.createdAt;
                     })
-                    .slice(0, 3)
+                    .slice(0, 4)
                     .map((todo: any) => (
                       <div 
                         key={todo.id} 
-                        className={`flex items-center p-2 rounded-md ${todo.completed ? 'opacity-70' : ''}`}
+                        className={`flex items-center px-1.5 py-1 rounded-md ${todo.completed ? 'opacity-60' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           const updatedItems = item.todoItems.map((t: any) => {
@@ -703,15 +711,15 @@ export default function LinksGrid({
                           type="checkbox"
                           checked={todo.completed}
                           readOnly
-                          className="mr-2 h-4 w-4 text-green-500 rounded focus:ring-green-400 border-gray-300"
+                          className="mr-1.5 h-3.5 w-3.5 text-green-500 rounded focus:ring-green-400 border-gray-300 dark:border-gray-500 flex-shrink-0"
                         />
-                        <span className={`text-sm truncate flex-grow ${todo.completed ? 'line-through text-gray-300' : 'text-white'}`}>
+                        <span className={`text-sm truncate flex-grow ${todo.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-700 dark:text-gray-200'}`}>
                           {todo.content}
                         </span>
                       </div>
                     ))
                 ) : (
-                  <div className="text-center text-gray-500 text-sm py-4">暂无待办事项</div>
+                  <div className="text-center text-gray-500 dark:text-gray-400 text-sm py-4">暂无待办事项</div>
                 )}
               </div>
             </div>
@@ -733,6 +741,7 @@ export default function LinksGrid({
             handleDragEnd={handleDragEnd}
             handleDragLeave={handleDragLeave}
             setIsMovieCalendarDialogOpen={setIsMovieCalendarDialogOpen}
+            colSpan={movieCalendarSpan}
           />
         );
       }
@@ -741,11 +750,12 @@ export default function LinksGrid({
       return (
         <div 
           key={item.id} 
-          className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2' : ''}`}
+          className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2 h-full' : ''}`}
+          style={item.isHotBoard ? { gridColumn: `span ${widgetSpan}` } : undefined}
         >
           {item.isHotBoard ? (
           <div 
-            className={`bg-white/10 backdrop-blur-md rounded-xl p-4 text-white hover:bg-white/20 transition-all group link-card relative dark:bg-gray-800/80 dark:hover:bg-gray-700/80 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''} h-full`}
+            className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-gray-800 dark:text-white hover:bg-white/20 transition-all group link-card relative shadow-lg shadow-black/5 h-3/4 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
             onContextMenu={(e) => handleContextMenu(e, item)}
             draggable="true"
             onDragStart={(e) => handleDragStart(e, item)}
@@ -757,29 +767,27 @@ export default function LinksGrid({
               onHotBoardClick?.();
             }}
           >
-            <div className="flex flex-col max-h-[155px]">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
-                  <div className="w-7 h-7 flex-shrink-0 flex items-center justify-center">
-                    <i className="fas fa-fire text-base text-orange-500"></i>
-                  </div>
-                  <span className="font-medium truncate text-sm">知乎热榜</span>
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-2 flex-shrink-0">
+                <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 dark:hover:text-orange-300 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
+                  <i className="fas fa-fire text-sm text-orange-500"></i>
+                  <span className="font-semibold text-sm">知乎热榜</span>
                 </div>
               </div>
-                  <div className="space-y-1.5 mt-1.5 flex-grow">
-                    {isLoadingHotBoard ? (
-                      <div className="text-center py-1.5"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
-                    ) : hotBoardData.length === 0 ? (
-                      <div className="text-xs text-gray-300 text-center py-1.5">暂无数据</div>
-                    ) : (
-                      hotBoardData.map((h, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <span className="text-xs font-medium text-white w-4 flex-shrink-0">{index + 1}</span>
-                          <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-200 hover:text-white truncate flex-grow leading-tight">{h.title}</a>
-                        </div>
-                      ))
-                    )}
-                  </div>
+              <div className="space-y-1 mt-1 flex-grow overflow-y-auto">
+                {isLoadingHotBoard ? (
+                  <div className="text-center py-2"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
+                ) : hotBoardData.length === 0 ? (
+                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">暂无数据</div>
+                ) : (
+                  hotBoardData.slice(0, 6).map((h, index) => (
+                    <div key={index} className="flex items-start gap-1.5">
+                      <span className={`text-xs font-bold w-5 flex-shrink-0 ${index < 3 ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'}`}>{index + 1}</span>
+                      <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-300 truncate flex-grow leading-tight">{h.title}</a>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
           ) : (
@@ -794,16 +802,16 @@ export default function LinksGrid({
             onDragLeave={handleDragLeave}
           >
             <div className="flex flex-col items-center justify-center gap-2">
-              <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-white/15">
+              <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
                 {item.useFavicon ? (
                   <img 
                     src={getFaviconUrl(item.url)} 
                     alt={`${item.name}图标`} 
-                    className="w-8 h-8 rounded-full object-cover" 
+                    className="w-14 h-14 rounded-full object-cover" 
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
                   />
                 ) : (
-                  <i className={`${item.icon || 'fas fa-link'} text-2xl text-white`}></i>
+                  <i className={`${item.icon || 'fas fa-link'} text-[36px] text-white`}></i>
                 )}
               </div>
               <span className="font-medium truncate text-sm text-white/90 text-center w-full">{item.name}</span>
@@ -822,7 +830,7 @@ export default function LinksGrid({
         <div className="flex items-center gap-2 group">
           <button
             className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
-              selectedCategory !== 'all' ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20 text-white dark:bg-gray-800/80 dark:hover:bg-gray-700/80 dark:text-white'
+              selectedCategory !== 'all' ? 'bg-primary text-white' : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-gray-700'
             }`}
           >
             <i className="fas fa-layer-group text-xs"></i>
@@ -837,7 +845,7 @@ export default function LinksGrid({
                 className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all shrink-0 ${
                   selectedCategory === category
                     ? 'bg-primary text-white'
-                    : 'bg-white/10 hover:bg-white/20 text-white dark:bg-gray-800/80 dark:hover:bg-gray-700/80 dark:text-white'
+                    : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-gray-700'
                 }`}
                 onClick={() => {
                   const event = new CustomEvent('categoryChange', { detail: category });
@@ -858,6 +866,7 @@ export default function LinksGrid({
           <div 
             key={`page-out-${prevPage}`}
             style={{ 
+              gridTemplateColumns: `repeat(${columns}, 1fr)`,
               gridTemplateRows: layout !== 'masonry' ? `repeat(${rowsPerPage}, minmax(0, 1fr))` : 'none'
             }}
             className={`${getGridClasses()} min-h-[200px] absolute inset-0 ${
@@ -872,6 +881,7 @@ export default function LinksGrid({
         <div 
           key={`page-in-${currentPage}`}
           style={{ 
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
             gridTemplateRows: layout !== 'masonry' ? `repeat(${rowsPerPage}, minmax(0, 1fr))` : 'none'
           }}
           className={`${getGridClasses()} min-h-[200px] absolute inset-0 ${

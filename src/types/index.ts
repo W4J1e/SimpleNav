@@ -16,7 +16,7 @@ export interface Settings {
   bgColor: string;
   bgImageUrl: string;
   bgUploadUrl: string;
-  gradientPreset: 'blue-purple' | 'green-blue' | 'orange-red' | 'pink-purple';
+  gradientPreset: 'purple-sunset' | 'ocean-depth' | 'aurora' | 'rose-dawn' | 'deep-space';
   layout: 'grid' | 'list' | 'masonry';
   searchEngine: 'bing' | 'google';
   showClock: boolean;
