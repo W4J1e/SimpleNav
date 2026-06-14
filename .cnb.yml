@@ -7,6 +7,5 @@ master:
             - https://cnb.cool/hin/env/-/blob/main/cnb2github.yml
           script: |
             git remote add github https://x-access-token:$GITHUB_TOKEN@github.com/W4J1e/SimpleNav
-            git push github master --force 
-            git push github dev --force              
+            git push github master --force           
          

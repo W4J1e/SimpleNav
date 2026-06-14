@@ -74,23 +74,23 @@ const MovieCalendarCard = ({
               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/40"></div>
             </div>
             <div className="absolute top-3 right-3 backdrop-blur-sm bg-white/20 dark:bg-white/10 rounded-lg px-1.5 py-0.5 text-center">
-              <div className="text-sm font-bold text-gray-900 dark:text-white">{currentDate.day}</div>
-              <div className="text-[10px] text-gray-600 dark:text-gray-300">{currentDate.month}/{currentDate.weekday}</div>
+              <div className="text-sm font-bold text-white">{currentDate.day}</div>
+              <div className="text-[10px] text-white/70">{currentDate.month}/{currentDate.weekday}</div>
             </div>
             <div className="ml-32 h-full flex flex-col justify-between">
               <div className="overflow-hidden">
-                <h3 className="text-base font-bold mb-1 truncate text-gray-900 dark:text-white">{movieData.mov_title}</h3>
+                <h3 className="text-base font-bold mb-1 truncate text-white">{movieData.mov_title}</h3>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-green-600 dark:text-green-400 text-sm">豆 {movieData.mov_rating}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{movieData.mov_year} {movieData.mov_area}</span>
+                  <span className="text-green-400 text-sm">豆 {movieData.mov_rating}</span>
+                  <span className="text-xs text-white/60 truncate">{movieData.mov_year} {movieData.mov_area}</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mb-2">
                   {movieData.mov_type.slice(0, 3).map((type: string, index: number) => (
-                    <span key={index} className="text-xs bg-white/20 dark:bg-white/10 rounded-full px-2 py-0.5 truncate max-w-[60px]">{type}</span>
+                    <span key={index} className="text-xs bg-white/20 dark:bg-white/10 text-white/80 rounded-full px-2 py-0.5 truncate max-w-[60px]">{type}</span>
                   ))}
                 </div>
               </div>
-              <div className="mt-1 text-sm italic text-gray-600 dark:text-gray-300 opacity-70 line-clamp-3 overflow-hidden">
+              <div className="mt-1 text-sm italic text-white/60 opacity-70 line-clamp-3 overflow-hidden">
                 "{movieData.mov_text}"
               </div>
             </div>
@@ -669,10 +669,10 @@ export default function LinksGrid({
               onClick={() => handleTodoDialogOpen(item)}
             >
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs bg-white/20 dark:bg-white/10 text-gray-700 dark:text-gray-200 px-1.5 py-0.5 rounded-full">
+                <span className="text-xs bg-white/20 dark:bg-white/10 text-white/80 dark:text-white/80 px-1.5 py-0.5 rounded-full">
                   {(item.todoItems || []).filter((t: any) => !t.completed).length}
                 </span>
-                <h3 className="font-medium truncate text-sm text-gray-800 dark:text-white">待办事项</h3>
+                <h3 className="font-medium truncate text-sm text-white/90 dark:text-white">待办事项</h3>
               </div>
               <div className="space-y-1 flex-grow overflow-y-auto">
                 {(item.todoItems || []).length > 0 ? (
@@ -711,15 +711,15 @@ export default function LinksGrid({
                           type="checkbox"
                           checked={todo.completed}
                           readOnly
-                          className="mr-1.5 h-3.5 w-3.5 text-green-500 rounded focus:ring-green-400 border-gray-300 dark:border-gray-500 flex-shrink-0"
+                          className={`mr-1.5 h-3.5 w-3.5 text-green-500 rounded focus:ring-green-400 border-white/40 dark:border-white/30 flex-shrink-0`}
                         />
-                        <span className={`text-sm truncate flex-grow ${todo.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-700 dark:text-gray-200'}`}>
+                        <span className={`text-sm truncate flex-grow ${todo.completed ? 'line-through text-white/40' : 'text-white/90 dark:text-white'}`}>
                           {todo.content}
                         </span>
                       </div>
                     ))
                 ) : (
-                  <div className="text-center text-gray-500 dark:text-gray-400 text-sm py-4">暂无待办事项</div>
+                  <div className="text-center text-white/50 text-sm py-4">暂无待办事项</div>
                 )}
               </div>
             </div>
@@ -771,19 +771,19 @@ export default function LinksGrid({
               <div className="flex items-center justify-between mb-2 flex-shrink-0">
                 <div className="flex items-center gap-2 cursor-pointer hover:text-orange-400 dark:hover:text-orange-300 transition-colors" onClick={(e) => { e.preventDefault(); onHotBoardClick?.(); }}>
                   <i className="fas fa-fire text-sm text-orange-500"></i>
-                  <span className="font-semibold text-sm">知乎热榜</span>
+                  <span className="font-semibold text-sm text-white">知乎热榜</span>
                 </div>
               </div>
               <div className="space-y-1 mt-1 flex-grow overflow-y-auto">
                 {isLoadingHotBoard ? (
                   <div className="text-center py-2"><i className="fas fa-spinner fa-spin text-sm text-gray-400"></i></div>
                 ) : hotBoardData.length === 0 ? (
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">暂无数据</div>
+                  <div className="text-sm text-white/50 text-center py-2">暂无数据</div>
                 ) : (
                   hotBoardData.slice(0, 6).map((h, index) => (
                     <div key={index} className="flex items-start gap-1.5">
-                      <span className={`text-xs font-bold w-5 flex-shrink-0 ${index < 3 ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'}`}>{index + 1}</span>
-                      <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-300 truncate flex-grow leading-tight">{h.title}</a>
+                      <span className={`text-xs font-bold w-5 flex-shrink-0 ${index < 3 ? 'text-orange-500' : 'text-white/50'}`}>{index + 1}</span>
+                      <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-sm text-white/90 hover:text-orange-400 truncate flex-grow leading-tight">{h.title}</a>
                     </div>
                   ))
                 )}
@@ -830,7 +830,7 @@ export default function LinksGrid({
         <div className="flex items-center gap-2 group">
           <button
             className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
-              selectedCategory !== 'all' ? 'bg-primary text-white' : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-gray-700'
+              selectedCategory !== 'all' ? 'bg-primary text-white' : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-white/90'
             }`}
           >
             <i className="fas fa-layer-group text-xs"></i>
@@ -845,7 +845,7 @@ export default function LinksGrid({
                 className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all shrink-0 ${
                   selectedCategory === category
                     ? 'bg-primary text-white'
-                    : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-gray-700'
+                    : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-white/90'
                 }`}
                 onClick={() => {
                   const event = new CustomEvent('categoryChange', { detail: category });

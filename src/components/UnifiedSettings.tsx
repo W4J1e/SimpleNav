@@ -556,10 +556,10 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
                         className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       >
                         <option value="purple-sunset">晨曦柔光</option>
-                        <option value="ocean-depth">雾蓝静谧</option>
+                        <option value="ocean-depth">深空幻境</option>
                         <option value="aurora">极光流动</option>
                         <option value="rose-dawn">暖日微光</option>
-                        <option value="deep-space">深空幻境</option>
+                        <option value="deep-space">雾蓝静谧</option>
                       </select>
                     </div>
                   )}
