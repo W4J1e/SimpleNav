@@ -15,7 +15,7 @@ interface UnifiedSettingsProps {
 }
 
 export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSettingsChange }: UnifiedSettingsProps) {
-  const [activeTab, setActiveTab] = useState<'storage' | 'data' | 'background' | 'components'>('storage');
+  const [activeTab, setActiveTab] = useState<'storage' | 'data' | 'background' | 'components' | 'about'>('storage');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -387,6 +387,16 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
               >
                 组件管理
               </button>
+              <button
+                onClick={() => setActiveTab('about')}
+                className={`w-full text-left px-3 py-2 rounded-md ${
+                  activeTab === 'about'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+              >
+                了解更多
+              </button>
             </div>
           </div>
           
@@ -703,6 +713,56 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'about' && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <img src="/favicon.ico" alt="网站图标" className="w-full h-full object-contain" />
+                  </div>
+                  <h4 className="text-lg font-medium text-gray-800 dark:text-white">SimpleNav</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">0.2.1</p>
+                </div>
+
+                <div className="border-t dark:border-gray-700 pt-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <i className="fas fa-user text-blue-500 mr-3"></i>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">作者</p>
+                        <a href="https://hin.cool" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">W4J1e</a>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <i className="fas fa-cog text-blue-500 mr-3"></i>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">主要功能</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          个性化导航、自定义背景、链接管理、OneDrive同步
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <i className="fas fa-heart text-red-500 mr-3"></i>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">开源项目</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          基于 Next.js + React + TypeScript + Tailwind CSS 构建
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t dark:border-gray-700 pt-4">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    © 2026 <a href="https://github.com/W4J1e/Simplenav" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline dark:text-blue-400">SimpleNav</a>. 保留所有权利.
+                  </p>
                 </div>
               </div>
             )}

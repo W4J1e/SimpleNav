@@ -7,7 +7,6 @@ import LinksGrid from '@/components/LinksGrid';
 import LinkForm from '@/components/LinkForm';
 import Footer from '@/components/Footer';
 import UnifiedSettings from '@/components/UnifiedSettings';
-import AboutDialog from '@/components/AboutDialog';
 import ZhihuHotBoardDialog from '@/components/ZhihuHotBoardDialog';
 import DynamicBackground from '@/components/DynamicBackground';
 import { Link, Settings } from '@/types';
@@ -34,7 +33,6 @@ export default function HomePage() {
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isUnifiedSettingsOpen, setIsUnifiedSettingsOpen] = useState(false);
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isZhihuHotBoardOpen, setIsZhihuHotBoardOpen] = useState(false);
   const [showAuthExpiredToast, setShowAuthExpiredToast] = useState(false);
   const [paginationState, setPaginationState] = useState<{ currentPage: number; totalPages: number }>({
@@ -241,11 +239,6 @@ export default function HomePage() {
     setIsUnifiedSettingsOpen(!isUnifiedSettingsOpen);
   };
 
-  // 切换关于对话框
-  const toggleAbout = () => {
-    setIsAboutOpen(!isAboutOpen);
-  };
-
   // 切换链接表单
   const toggleLinkForm = () => {
     setIsLinkFormOpen(!isLinkFormOpen);
@@ -349,7 +342,9 @@ export default function HomePage() {
 
       <Header
         onToggleAddLink={toggleLinkForm}
+        onToggleTheme={toggleTheme}
         onToggleUnifiedSettings={toggleUnifiedSettings}
+        darkMode={settings.darkMode}
         userInfo={userInfo}
       />
       
@@ -378,9 +373,6 @@ export default function HomePage() {
       </main>
       
       <Footer
-        onToggleAbout={toggleAbout}
-        onToggleTheme={toggleTheme}
-        darkMode={settings.darkMode}
         currentPage={paginationState.currentPage}
         totalPages={paginationState.totalPages}
         onPageChange={(page) => {
@@ -406,13 +398,7 @@ export default function HomePage() {
         onLinksChange={setLinks}
         onSettingsChange={setSettings}
       />
-      
-      {/* 关于对话框 */}
-      <AboutDialog 
-        isOpen={isAboutOpen}
-        onClose={toggleAbout}
-      />
-      
+
       {/* 知乎热榜对话框 */}
       <ZhihuHotBoardDialog 
         isOpen={isZhihuHotBoardOpen}

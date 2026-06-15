@@ -77,7 +77,7 @@ const MovieCalendarCard = ({
               <div className="text-sm font-bold text-white">{currentDate.day}</div>
               <div className="text-[10px] text-white/70">{currentDate.month}/{currentDate.weekday}</div>
             </div>
-            <div className="ml-32 h-full flex flex-col justify-between">
+            <div className="ml-32 h-full flex flex-col justify-start">
               <div className="overflow-hidden">
                 <h3 className="text-base font-bold mb-1 truncate text-white">{movieData.mov_title}</h3>
                 <div className="flex items-center gap-2 mb-1">
@@ -90,7 +90,7 @@ const MovieCalendarCard = ({
                   ))}
                 </div>
               </div>
-              <div className="mt-1 text-sm italic text-white/60 opacity-70 line-clamp-3 overflow-hidden">
+              <div className="text-sm italic text-white/60 opacity-70 line-clamp-3 overflow-hidden">
                 "{movieData.mov_text}"
               </div>
             </div>
