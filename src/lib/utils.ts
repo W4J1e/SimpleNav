@@ -59,7 +59,7 @@ export const getIconFromUrl = (url: string): string => {
   try {
     const parsedUrl = new URL(url);
     const domain = parsedUrl.hostname.replace('www.', '');
-    const iconName = domain.split('.')[0];
+    const iconName = domain.split('.')[0] || 'link';
     
     // 品牌图标列表，这些应该使用fab前缀
     const brandIcons = [
@@ -87,7 +87,7 @@ export const getGradientBackground = (preset: string): string => {
     'rose-dawn': 'linear-gradient(135deg, #FBE4D5 0%, #F5DDF0 50%, #FDF0D5 100%)',
     'deep-space': 'linear-gradient(135deg, #E0D5F5 0%, #D5D0F0 50%, #C0D0F5 100%)',
   };
-  return gradients[preset] || gradients['purple-sunset'];
+  return (gradients[preset] || gradients['purple-sunset'])!;
 };
 
 // 预加载图片

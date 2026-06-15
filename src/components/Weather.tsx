@@ -121,7 +121,7 @@ export default function Weather() {
   }
 
   // 获取今天的天气数据
-  const todayWeather = weatherData.daily[0];
+  const todayWeather = weatherData.daily[0]!;
 
   return (
     <div 

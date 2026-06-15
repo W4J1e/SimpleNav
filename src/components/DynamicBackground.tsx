@@ -450,7 +450,7 @@ export default function DynamicBackground({ preset, darkMode }: DynamicBackgroun
     setMounted(true);
   }, []);
 
-  const config = gradientPresets[preset] || gradientPresets['purple-sunset'];
+  const config = (gradientPresets[preset] || gradientPresets['purple-sunset'])!;
   const theme = darkMode ? config.dark : config.light;
 
   if (!mounted) return null;

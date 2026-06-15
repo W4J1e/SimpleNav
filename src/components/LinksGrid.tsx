@@ -46,7 +46,7 @@ const MovieCalendarCard = ({
     setCurrentDate({ 
       day: date.getDate(), 
       month: `${date.getMonth() + 1}月`, 
-      weekday: weekdays[date.getDay()] 
+      weekday: weekdays[date.getDay()]! 
     });
   }, []);
 
@@ -217,7 +217,7 @@ export default function LinksGrid({
           let fits = true;
           for (let dr = 0; dr < h; dr++) {
             for (let dc = 0; dc < w; dc++) {
-              if (gridOccupancy[r + dr][c + dc]) {
+              if (gridOccupancy[r + dr]![c + dc]) {
                 fits = false;
                 break;
               }
@@ -240,7 +240,7 @@ export default function LinksGrid({
             // 标记网格占用
             for (let dr = 0; dr < h; dr++) {
               for (let dc = 0; dc < w; dc++) {
-                gridOccupancy[r + dr][c + dc] = true;
+                gridOccupancy[r + dr]![c + dc] = true;
               }
             }
             
@@ -421,12 +421,12 @@ export default function LinksGrid({
     // 触摸翻页 - 改为左右滑动
     let touchStartX = 0;
     const handleTouchStart = (e: TouchEvent) => {
-      touchStartX = e.touches[0].clientX;
+      touchStartX = e.touches[0]!.clientX;
     };
     const handleTouchEnd = (e: TouchEvent) => {
       if (isAnimating) return;
 
-      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndX = e.changedTouches[0]!.clientX;
       const deltaX = touchStartX - touchEndX; // 正值表示向左滑（下一页），负值表示向右滑（上一页）
       const now = Date.now();
       
@@ -477,8 +477,9 @@ export default function LinksGrid({
     
     // 更新链接数组中的待办事项数据
     const newLinks = [...safeLinks];
+    const currentLink = newLinks[todoLinkIndex]!;
     newLinks[todoLinkIndex] = {
-      ...newLinks[todoLinkIndex],
+      ...currentLink,
       todoItems: newTodos
     };
     
@@ -609,7 +610,7 @@ export default function LinksGrid({
         const insertIndex = targetIndex;
         
         // 插入到目标位置
-        newLinks.splice(insertIndex, 0, removedCard);
+        newLinks.splice(insertIndex, 0, removedCard!);
         
         // 调用回调更新顺序
         onLinksReorder(newLinks);

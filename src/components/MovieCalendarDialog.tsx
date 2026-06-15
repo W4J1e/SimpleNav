@@ -38,7 +38,7 @@ export default function MovieCalendarDialog({ isOpen, onClose }: MovieCalendarDi
     const day = date.getDate();
     const month = `${date.getMonth() + 1}月`;
     const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    const weekday = weekdays[date.getDay()];
+    const weekday = weekdays[date.getDay()]!;
     
     setCurrentDate({ day, month, weekday });
   }, []);
