@@ -140,7 +140,7 @@ export default function Weather() {
       
       {/* 悬停时显示的详情卡片 */}
       {isHovered && (
-        <div className="absolute top-full left-0 mt-2 bg-white/70 backdrop-blur-xl rounded-lg p-4 shadow-lg min-w-[280px] z-50 text-gray-700 border border-white/40">
+        <div className="absolute top-full left-[-20px] mt-2 bg-white/70 backdrop-blur-xl rounded-lg p-4 shadow-lg min-w-[280px] z-50 text-gray-700 border border-white/40">
           {/* 城市和日期 */}
           <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
             <div className="font-medium">{weatherData.city}</div>

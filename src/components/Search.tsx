@@ -77,8 +77,8 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
       <div
         ref={containerRef}
         onMouseEnter={() => setIsExpanded(true)}
-        className={`relative flex items-center bg-white/60 backdrop-blur-xl border border-white/40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] rounded-full overflow-hidden ${
-          isExpanded ? 'w-full h-12 shadow-lg shadow-black/10' : 'w-12 h-12 hover:bg-white/70 cursor-pointer'
+        className={`relative flex items-center bg-white/10 backdrop-blur-md border border-white/20 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] rounded-full overflow-hidden ${
+          isExpanded ? 'w-full h-12 shadow-lg shadow-black/10' : 'w-12 h-12 hover:bg-white/20 cursor-pointer'
         }`}
       >
         {/* 收起状态：放大镜图标 */}
@@ -97,7 +97,7 @@ export default function Search({ searchEngine, onSearchEngineChange }: SearchPro
           {/* 搜索引擎切换按钮 */}
           <button
             onClick={handleEngineChange}
-            className="shrink-0 w-12 h-12 flex items-center justify-center bg-white/30 hover:bg-white/50 text-white/80 hover:text-white font-bold text-sm transition-all rounded-l-full border-r border-white/20"
+            className="shrink-0 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white/80 hover:text-white font-bold text-sm transition-all rounded-l-full border-r border-white/20"
             title={`当前：${searchEngine === 'bing' ? '必应' : '谷歌'}，点击切换`}
           >
             {searchEngine === 'bing' ? 'B' : 'G'}

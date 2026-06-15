@@ -54,7 +54,7 @@ const MovieCalendarCard = ({
   const isOver = draggedOverLinkId === movieLink.id;
 
   return (
-    <div key={movieLink.id} className="row-span-2 h-full" style={{ gridColumn: `span ${colSpan}` }}>
+    <div key={movieLink.id} className="row-span-2 h-[110%]" style={{ gridColumn: `span ${colSpan}` }}>
       <div 
         className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-gray-800 dark:text-white hover:bg-white/20 transition-all group link-card relative shadow-lg shadow-black/5 h-3/4 overflow-hidden cursor-pointer ${isDragging ? 'opacity-50 transform scale-105' : ''} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
         draggable="true"
@@ -90,7 +90,7 @@ const MovieCalendarCard = ({
                   ))}
                 </div>
               </div>
-              <div className="text-sm italic text-white/60 opacity-70 line-clamp-3 overflow-hidden">
+              <div className="text-sm italic text-white/80 opacity-90 line-clamp-3 overflow-hidden">
                 "{movieData.mov_text}"
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function LinksGrid({
       // 计算每行高度（卡片最小高度 + 间距）
       // 图标圆圈 w-20 h-20 + 文字 + 间距，实际约 110px
       const cardMinHeight = 110;
-      const gapY = width >= 768 ? 16 : 12;
+      const gapY = width >= 768 ? 8 : 4;
       const rowHeight = cardMinHeight + gapY;
 
       // 动态计算行数，至少显示2行，最多不限制
@@ -629,7 +629,7 @@ export default function LinksGrid({
 
   const getGridClasses = () => {
     if (layout === 'grid' || layout === 'list') {
-      return 'grid gap-x-2 gap-y-3 md:gap-x-3 md:gap-y-4 content-start items-start';
+      return 'grid gap-x-2 gap-y-1 md:gap-x-3 md:gap-y-2 content-start items-start';
     } else if (layout === 'masonry') {
       return 'masonry-grid';
     }
@@ -648,8 +648,10 @@ export default function LinksGrid({
               className="flex items-center justify-center h-full cursor-pointer group transition-opacity hover:opacity-80"
               onClick={onAddLink}
             >
-              <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 border-dashed border-white/30 group-hover:border-white/50 transition-colors">
-                <i className="fas fa-plus text-2xl text-white/40 group-hover:text-white/70 transition-colors"></i>
+              <div className="w-20 h-20 flex items-center justify-center">
+                <div className="w-[65%] h-[65%] flex items-center justify-center rounded-full border-2 border-dashed border-white/30 group-hover:border-white/50 transition-colors">
+                  <i className="fas fa-plus text-2xl text-white/40 group-hover:text-white/70 transition-colors"></i>
+                </div>
               </div>
             </div>
           </div>
@@ -659,7 +661,7 @@ export default function LinksGrid({
       if (item.isTodo) {
         // 渲染待办事项卡片
         return (
-          <div key={item.id} className="row-span-2 h-full" style={{ gridColumn: `span ${widgetSpan}` }}>
+          <div key={item.id} className="row-span-2 h-[110%]" style={{ gridColumn: `span ${widgetSpan}` }}>
             <div 
               className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-gray-800 dark:text-white hover:bg-white/20 transition-all group link-card relative shadow-lg shadow-black/5 h-3/4 ${draggedLinkId === item.id ? 'opacity-50 transform scale-105' : ''} ${draggedOverLinkId === item.id ? 'ring-2 ring-blue-400' : ''}`}
               draggable="true"
@@ -751,7 +753,7 @@ export default function LinksGrid({
       return (
         <div 
           key={item.id} 
-          className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2 h-full' : ''}`}
+          className={`${layout === 'masonry' ? 'masonry-item' : ''} ${item.isHotBoard ? 'row-span-2 h-[110%]' : ''}`}
           style={item.isHotBoard ? { gridColumn: `span ${widgetSpan}` } : undefined}
         >
           {item.isHotBoard ? (
@@ -802,15 +804,17 @@ export default function LinksGrid({
             onDragEnd={handleDragEnd}
             onDragLeave={handleDragLeave}
           >
-            <div className="flex flex-col items-center justify-center gap-2">
+            <div className="flex flex-col items-center justify-center gap-0.5">
               <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center">
                 {item.useFavicon ? (
+                  <div className="w-[65%] h-[65%] rounded-full overflow-hidden">
                   <img 
                     src={getFaviconUrl(item.url)} 
                     alt={`${item.name}图标`} 
-                    className="w-14 h-14 object-contain" 
+                    className="w-full h-full object-cover" 
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
                   />
+                  </div>
                 ) : (
                   <i className={`${item.icon || 'fas fa-link'} text-[36px] text-white`}></i>
                 )}
@@ -831,7 +835,7 @@ export default function LinksGrid({
         <div className="flex items-center gap-2 group">
           <button
             className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
-              selectedCategory !== 'all' ? 'bg-primary text-white' : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-white/90'
+              selectedCategory !== 'all' ? 'bg-primary text-white' : 'bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white/90'
             }`}
           >
             <i className="fas fa-layer-group text-xs"></i>
@@ -846,7 +850,7 @@ export default function LinksGrid({
                 className={`category-tab px-4 py-2 rounded-full whitespace-nowrap transition-all shrink-0 ${
                   selectedCategory === category
                     ? 'bg-primary text-white'
-                    : 'bg-white/40 backdrop-blur-lg border border-white/30 hover:bg-white/50 text-white/90'
+                    : 'bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white/90'
                 }`}
                 onClick={() => {
                   const event = new CustomEvent('categoryChange', { detail: category });
