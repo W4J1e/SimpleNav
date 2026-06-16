@@ -1,5 +1,88 @@
 import { Settings } from '@/types';
 
+// ============ Favicon IndexedDB 缓存 ============
+const FAVICON_DB_NAME = 'favicon_cache';
+const FAVICON_STORE_NAME = 'favicons';
+const FAVICON_CACHE_DAYS = 30; // 缓存有效期30天
+
+function openFaviconDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(FAVICON_DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(FAVICON_STORE_NAME)) {
+        db.createObjectStore(FAVICON_STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+interface CachedFavicon {
+  dataUrl: string;
+  timestamp: number;
+}
+
+// 从缓存获取favicon
+export async function getCachedFavicon(domain: string): Promise<string | null> {
+  try {
+    const db = await openFaviconDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(FAVICON_STORE_NAME, 'readonly');
+      const store = tx.objectStore(FAVICON_STORE_NAME);
+      const request = store.get(domain);
+      request.onsuccess = () => {
+        const cached = request.result as CachedFavicon | undefined;
+        if (cached && (Date.now() - cached.timestamp < FAVICON_CACHE_DAYS * 24 * 60 * 60 * 1000)) {
+          resolve(cached.dataUrl);
+        } else {
+          resolve(null);
+        }
+      };
+      request.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+// 将favicon存入缓存
+export async function setCachedFavicon(domain: string, dataUrl: string): Promise<void> {
+  try {
+    const db = await openFaviconDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(FAVICON_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(FAVICON_STORE_NAME);
+      store.put({ dataUrl, timestamp: Date.now() } as CachedFavicon, domain);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  } catch {
+    // 缓存写入失败不影响功能
+  }
+}
+
+// 通过fetch获取favicon并转为dataUrl缓存
+export async function fetchAndCacheFavicon(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl);
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 // 默认背景图片 URL
 export const DEFAULT_BG_IMAGE = 'https://cn.bing.com/th?id=OHR.OldRockArch_EN-US2422589534_1920x1080.jpg';
 
@@ -32,24 +115,20 @@ export const getFaviconUrl = (url: string): string | undefined => {
   }
 };
 
-// 改进的favicon获取方法 - 使用Favicon.im API获取（带大尺寸参数）
-export const getBetterFaviconUrl = (url: string): string | undefined => {
+// 使用Favicon.im代理获取高清图标
+export const getProxyFaviconUrl = (url: string): string | undefined => {
   let parsedUrl;
   
-  // 尝试解析URL
   try {
     parsedUrl = new URL(url);
   } catch (e) {
-    // URL解析失败，返回undefined触发onError事件
     return undefined;
   }
   
-  // URL解析成功，返回Favicon.im API链接（带?larger=true参数获取大尺寸图标）
   if (parsedUrl) {
     const domain = parsedUrl.hostname;
     return `https://favicon.im/${domain}?larger=true`;
   } else {
-    // 理论上不会执行到这里，但作为后备
     return undefined;
   }
 };

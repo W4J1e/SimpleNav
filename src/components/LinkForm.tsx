@@ -20,6 +20,7 @@ export default function LinkForm({ isOpen, onClose, onSave, link, categories }: 
     icon: 'fa-link',
     category: '未分类',
     useFavicon: false,
+    useProxyFavicon: false,
   });
   
   // 下拉菜单状态
@@ -54,16 +55,24 @@ export default function LinkForm({ isOpen, onClose, onSave, link, categories }: 
         icon: 'fa-link',
         category: '未分类',
         useFavicon: false,
+        useProxyFavicon: false,
       });
     }
   }, [link, isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      };
+      // 取消useFavicon时，同时取消useProxyFavicon
+      if (name === 'useFavicon' && !checked) {
+        updated.useProxyFavicon = false;
+      }
+      return updated;
+    });
   };
 
   const handleFetchIcon = () => {
@@ -162,6 +171,18 @@ export default function LinkForm({ isOpen, onClose, onSave, link, categories }: 
                   />
                   <label className="text-sm text-gray-700 dark:text-gray-300">使用网站favicon.ico作为图标</label>
                 </div>
+                {formData.useFavicon && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <input 
+                      type="checkbox" 
+                      name="useProxyFavicon"
+                      checked={formData.useProxyFavicon || false}
+                      onChange={handleInputChange}
+                      className="form-checkbox h-5 w-5 text-primary rounded border-gray-300 dark:border-gray-600 focus:ring-primary"
+                    />
+                    <label className="text-sm text-gray-700 dark:text-gray-300">使用Favicon.im获取高清图标</label>
+                  </div>
+                )}
               </div>
             </div>
             <div className="mb-4 category-selector">

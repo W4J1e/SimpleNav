@@ -1,8 +1,8 @@
 'use client';
 
 import { Link as LinkType, TodoItem } from '../types/index';
-import { getFaviconUrl, getBetterFaviconUrl } from '../lib/utils';
-import { useState, useEffect, useMemo } from 'react';
+import { getFaviconUrl, getProxyFaviconUrl, getCachedFavicon, setCachedFavicon, fetchAndCacheFavicon } from '../lib/utils';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 import TodoDialog from './TodoDialog';
 import MovieCalendarDialog from './MovieCalendarDialog';
@@ -158,6 +158,56 @@ export default function LinksGrid({
 
 
   const safeLinks = Array.isArray(links) ? links : [];
+
+  // 代理Favicon缓存：domain -> dataUrl（仅用于useProxyFavicon的链接）
+  const [proxyFaviconCache, setProxyFaviconCache] = useState<Record<string, string>>({});
+  const proxyFaviconLoadingRef = useRef<Set<string>>(new Set());
+
+  // 加载代理favicon（优先从IndexedDB缓存，否则从代理获取并缓存）
+  const loadProxyFavicon = useCallback(async (url: string) => {
+    let domain: string;
+    try {
+      domain = new URL(url).hostname;
+    } catch {
+      return;
+    }
+
+    if (proxyFaviconCache[domain]) return;
+    if (proxyFaviconLoadingRef.current.has(domain)) return;
+    proxyFaviconLoadingRef.current.add(domain);
+
+    try {
+      // 先查IndexedDB缓存
+      const cached = await getCachedFavicon(domain);
+      if (cached) {
+        setProxyFaviconCache(prev => ({ ...prev, [domain]: cached }));
+        return;
+      }
+
+      // 从代理获取
+      const proxyUrl = getProxyFaviconUrl(url);
+      if (!proxyUrl) return;
+
+      const dataUrl = await fetchAndCacheFavicon(proxyUrl);
+      if (dataUrl) {
+        await setCachedFavicon(domain, dataUrl);
+        setProxyFaviconCache(prev => ({ ...prev, [domain]: dataUrl }));
+      }
+    } catch {
+      // 获取失败，静默处理
+    } finally {
+      proxyFaviconLoadingRef.current.delete(domain);
+    }
+  }, [proxyFaviconCache]);
+
+  // 当links变化时，加载所有代理favicon
+  useEffect(() => {
+    safeLinks.forEach(link => {
+      if (link.useProxyFavicon && link.url) {
+        loadProxyFavicon(link.url);
+      }
+    });
+  }, [safeLinks, loadProxyFavicon]);
 
   
   // 使用 useMemo 避免每次渲染都重新计算分页，确保计算过程纯净
@@ -806,13 +856,27 @@ export default function LinksGrid({
           >
             <div className="flex flex-col items-center justify-center gap-0.5">
               <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center">
-                {item.useFavicon ? (
+                {item.useProxyFavicon ? (
+                  <div className="w-[65%] h-[65%] rounded-full overflow-hidden">
+                  <img 
+                    src={(() => {
+                      try {
+                        const domain = new URL(item.url).hostname;
+                        return proxyFaviconCache[domain] || getProxyFaviconUrl(item.url) || '';
+                      } catch { return ''; }
+                    })()} 
+                    alt={`${item.name}图标`} 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = getFaviconUrl(item.url) || ''; }}
+                  />
+                  </div>
+                ) : item.useFavicon ? (
                   <div className="w-[65%] h-[65%] rounded-full overflow-hidden">
                   <img 
                     src={getFaviconUrl(item.url)} 
                     alt={`${item.name}图标`} 
                     className="w-full h-full object-cover" 
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = getBetterFaviconUrl(item.url) || ''; }}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = getProxyFaviconUrl(item.url) || ''; }}
                   />
                   </div>
                 ) : (

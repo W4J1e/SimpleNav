@@ -5,6 +5,7 @@ export interface Link {
   icon: string;
   category: string;
   useFavicon: boolean;
+  useProxyFavicon?: boolean; // 使用Favicon.im代理获取高清图标
   isHotBoard?: boolean; // 标识是否为热榜卡片
   isTodo?: boolean; // 标识是否为待办事项卡片
   isMovieCalendar?: boolean; // 标识是否为电影日历卡片
