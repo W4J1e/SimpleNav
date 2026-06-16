@@ -10,7 +10,7 @@ import UnifiedSettings from '@/components/UnifiedSettings';
 import ZhihuHotBoardDialog from '@/components/ZhihuHotBoardDialog';
 import DynamicBackground from '@/components/DynamicBackground';
 import { Link, Settings } from '@/types';
-import { getLinks, saveLinks, getSettings, saveSettings, useOneDriveStorage, setUseOneDriveStorage, syncFromOneDrive, syncData, defaultSettings } from '@/lib/storage';
+import { getLinks, saveLinks, getSettings, saveSettings, useOneDriveStorage, setUseOneDriveStorage, syncData, defaultSettings } from '@/lib/storage';
 import { oneDriveStorage } from '@/lib/onedrive-storage';
 
 interface UserInfo {

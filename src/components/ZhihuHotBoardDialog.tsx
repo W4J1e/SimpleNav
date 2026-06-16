@@ -29,7 +29,7 @@ export default function ZhihuHotBoardDialog({ isOpen, onClose }: ZhihuHotBoardDi
     setError(null);
     try {
       // 调用外部API获取知乎热榜数据
-      const response = await fetch('https://uapis.cn/api/v1/misc/hotboard?type=zhihu', {
+      const response = await fetch('/api/zhihu-hot', {
         method: 'GET',
         cache: 'no-store' // 禁用缓存，确保每次都获取最新数据
       });

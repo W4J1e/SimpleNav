@@ -724,7 +724,7 @@ export default function UnifiedSettings({ isOpen, onClose, onLinksChange, onSett
                     <img src="/favicon.ico" alt="网站图标" className="w-full h-full object-contain" />
                   </div>
                   <h4 className="text-lg font-medium text-gray-800 dark:text-white">SimpleNav</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">0.2.1</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">0.2.2</p>
                 </div>
 
                 <div className="border-t dark:border-gray-700 pt-4">

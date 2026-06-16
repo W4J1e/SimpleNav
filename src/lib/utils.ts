@@ -63,10 +63,10 @@ export async function setCachedFavicon(domain: string, dataUrl: string): Promise
   }
 }
 
-// 通过fetch获取favicon并转为dataUrl缓存
+// 通过fetch获取favicon并转为dataUrl缓存（使用本地代理，无CORS问题）
 export async function fetchAndCacheFavicon(url: string): Promise<string | null> {
   try {
-    const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
+    const response = await fetch(url);
     if (!response.ok) return null;
     const blob = await response.blob();
     return new Promise((resolve) => {
@@ -115,7 +115,7 @@ export const getFaviconUrl = (url: string): string | undefined => {
   }
 };
 
-// 使用Favicon.im代理获取高清图标
+// 使用本地代理获取Favicon.im高清图标（避免CORS）
 export const getProxyFaviconUrl = (url: string): string | undefined => {
   let parsedUrl;
   
@@ -127,7 +127,7 @@ export const getProxyFaviconUrl = (url: string): string | undefined => {
   
   if (parsedUrl) {
     const domain = parsedUrl.hostname;
-    return `https://favicon.im/${domain}?larger=true`;
+    return `/api/favicon?domain=${domain}`;
   } else {
     return undefined;
   }
@@ -157,20 +157,8 @@ export const getIconFromUrl = (url: string): string => {
   }
 };
 
-// 获取渐变背景 - 已迁移至 SVG 渐变方案，此函数保留兼容
-export const getGradientBackground = (preset: string): string => {
-  const gradients: Record<string, string> = {
-    'purple-sunset': 'linear-gradient(135deg, #E8DFF5 0%, #FFE4D1 50%, #FCE4EC 100%)',
-    'ocean-depth': 'linear-gradient(135deg, #D1E4FF 0%, #C8DDF5 50%, #B0C8E0 100%)',
-    'aurora': 'linear-gradient(135deg, #D0F0E8 0%, #DDE4F5 50%, #C8E8D0 100%)',
-    'rose-dawn': 'linear-gradient(135deg, #FBE4D5 0%, #F5DDF0 50%, #FDF0D5 100%)',
-    'deep-space': 'linear-gradient(135deg, #E0D5F5 0%, #D5D0F0 50%, #C0D0F5 100%)',
-  };
-  return (gradients[preset] || gradients['purple-sunset'])!;
-};
-
-// 预加载图片
-export const preloadImage = (url: string): Promise<string> => {
+// 预加载图片（内部使用）
+const preloadImage = (url: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     
@@ -195,8 +183,8 @@ export const preloadImage = (url: string): Promise<string> => {
   });
 };
 
-// 获取Bing每日一图
-export const getBingImage = async (): Promise<string> => {
+// 获取Bing每日一图（内部使用）
+const getBingImage = async (): Promise<string> => {
   try {
     // 1. 尝试使用内置 API
     const response = await fetch('/api/bing-image', { cache: 'no-store' });
@@ -303,21 +291,4 @@ export const applyAppBackground = (settings: Settings) => {
   };
 
   loadAsyncBackground();
-};
-
-// 格式化时间
-export const formatTime = (date: Date): string => {
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`;
-};
-
-// 格式化日期
-export const formatDate = (date: Date): string => {
-  const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-  const weekday = weekdays[date.getDay()];
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${weekday}, ${year}年${month}月${day}日`;
 };

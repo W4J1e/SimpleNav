@@ -304,7 +304,7 @@ export default function LinksGrid({
       }
     });
     return pagesResult;
-  }, [links, selectedCategory, layout, columns, rowsPerPage, enabledComponents, movieCalendarSpan, widgetSpan]);
+  }, [safeLinks, selectedCategory, layout, columns, rowsPerPage, enabledComponents]);
 
 
   const totalPages = pages.length;
@@ -576,7 +576,7 @@ export default function LinksGrid({
   const fetchHotBoardData = async () => {
     setIsLoadingHotBoard(true);
     try {
-      const response = await fetch('https://uapis.cn/api/v1/misc/hotboard?type=zhihu', {
+      const response = await fetch('/api/zhihu-hot', {
         cache: 'no-store'
       });
       if (response.ok) {
@@ -833,7 +833,7 @@ export default function LinksGrid({
                 ) : hotBoardData.length === 0 ? (
                   <div className="text-sm text-white/50 text-center py-2">暂无数据</div>
                 ) : (
-                  hotBoardData.slice(0, 6).map((h, index) => (
+                  hotBoardData.map((h, index) => (
                     <div key={index} className="flex items-start gap-1.5">
                       <span className={`text-xs font-bold w-5 flex-shrink-0 ${index < 3 ? 'text-orange-500' : 'text-white/50'}`}>{index + 1}</span>
                       <a href={h.url} target="_blank" rel="noopener noreferrer" className="text-sm text-white/90 hover:text-orange-400 truncate flex-grow leading-tight">{h.title}</a>

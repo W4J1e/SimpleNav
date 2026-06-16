@@ -589,7 +589,3 @@ export default function DynamicBackground({ preset, darkMode }: DynamicBackgroun
     </div>
   );
 }
-
-export const gradientPresetNames: Record<string, string> = Object.fromEntries(
-  Object.entries(gradientPresets).map(([key, val]) => [key, val.name])
-);

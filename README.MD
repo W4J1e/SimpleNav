@@ -86,8 +86,6 @@ npm start
 
 ## 项目结构
 
-**以下内容有待优化完善**
-
 ```
 src/
 ├── app/                 # Next.js App Router
@@ -97,39 +95,36 @@ src/
 │   │   │   ├── login/   # 登录路由
 │   │   │   ├── logout/  # 登出路由
 │   │   │   └── status/  # 状态路由
-│   │   ├── bing-image/ # Bing图片API
-│   │   ├── debug/      # 调试API
-│   │   ├── onedrive/   # OneDrive API
-│   │   │   ├── links/   # 链接相关API
+│   │   ├── bing-image/   # Bing图片API
+│   │   ├── debug/        # 调试API
+│   │   ├── favicon/      # Favicon代理API
+│   │   ├── movie-calendar/ # 电影日历API
+│   │   ├── onedrive/     # OneDrive API
+│   │   │   ├── links/    # 链接相关API
 │   │   │   └── settings/ # 设置相关API
-│   │   └── zhihu-hot/  # 知乎热榜API
+│   │   └── zhihu-hot/    # 知乎热榜代理API
 │   ├── favicon.ico     # 网站图标
 │   ├── globals.css     # 全局样式
 │   ├── layout.tsx      # 根布局
 │   └── page.tsx        # 主页面
 ├── components/         # React 组件
-│   ├── AboutDialog.tsx    # 关于对话框
-│   ├── Clock.tsx          # 时钟组件
-│   ├── DataManagement.tsx # 数据管理组件
-│   ├── Footer.tsx         # 页脚组件
-│   ├── Header.tsx         # 头部组件
-│   ├── HelpDialog.tsx     # 帮助对话框
-│   ├── LinkForm.tsx       # 链接表单组件
-│   ├── LinksGrid.tsx      # 链接网格组件
-│   ├── MovieCalendar.tsx  # 电影日历组件
-│   ├── OneDriveAuth.tsx   # OneDrive认证组件
-│   ├── Search.tsx         # 搜索组件
-│   ├── StorageSettings.tsx # 存储设置组件
-│   ├── TodoDialog.tsx     # 待办事项对话框
-│   ├── UnifiedSettings.tsx # 统一设置面板组件
-│   ├── Weather.tsx        # 天气组件
-│   └── ZhihuHotBoardDialog.tsx # 知乎热榜对话框
+│   ├── DynamicBackground.tsx    # 动态渐变背景组件
+│   ├── Footer.tsx               # 页脚组件
+│   ├── Header.tsx               # 头部组件
+│   ├── LinkForm.tsx             # 链接表单组件
+│   ├── LinksGrid.tsx            # 链接网格组件（含小组件卡片）
+│   ├── MovieCalendarDialog.tsx  # 电影日历对话框
+│   ├── Search.tsx               # 搜索组件
+│   ├── TodoDialog.tsx           # 待办事项对话框
+│   ├── UnifiedSettings.tsx      # 统一设置面板组件
+│   ├── Weather.tsx               # 天气组件
+│   └── ZhihuHotBoardDialog.tsx  # 知乎热榜对话框
 ├── lib/                # 工具函数
-│   ├── auth.ts # OneDrive认证
-│   ├── onedrive.ts # OneDrive操作
-│   ├── onedrive-storage.ts # OneDrive存储操作
-│   ├── storage.ts          # 本地存储操作
-│   └── utils.ts            # 通用工具函数
+│   ├── auth.ts              # OneDrive认证
+│   ├── onedrive.ts          # OneDrive操作
+│   ├── onedrive-storage.ts  # OneDrive存储操作
+│   ├── storage.ts           # 本地存储操作
+│   └── utils.ts             # 通用工具函数（含Favicon缓存）
 └── types/              # TypeScript 类型定义
     └── index.ts        # 类型定义
 ```
