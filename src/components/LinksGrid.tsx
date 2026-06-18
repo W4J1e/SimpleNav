@@ -876,7 +876,6 @@ export default function LinksGrid({
                     src={getFaviconUrl(item.url)} 
                     alt={`${item.name}图标`} 
                     className="w-full h-full object-cover" 
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = getProxyFaviconUrl(item.url) || ''; }}
                   />
                   </div>
                 ) : (
